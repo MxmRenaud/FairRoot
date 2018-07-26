@@ -2,7 +2,7 @@
  *    Copyright (C) 2014 GSI Helmholtzzentrum fuer Schwerionenforschung GmbH    *
  *                                                                              *
  *              This software is distributed under the terms of the             * 
- *         GNU Lesser General Public Licence version 3 (LGPL) version 3,        *  
+ *              GNU Lesser General Public Licence (LGPL) version 3,             *  
  *                  copied verbatim in the file "LICENSE"                       *
  ********************************************************************************/
 #include "FairLogger.h"
@@ -15,20 +15,21 @@
 #include <cstdlib>
 #include <fstream>
 #include <algorithm>
-#include <boost/regex.hpp>
+#include <regex>
 
-static const char* const LogString[] = { "FATAL  ", "ERROR  ", "WARNING",
-                                       "INFO   ", "DEBUG  ", "DEBUG1 ",
-                                       "DEBUG2 ", "DEBUG3 ", "DEBUG4 "
-                                       };
+static const char* const LogString[] = {
+  "FATAL", "ERROR", "WARN", "INFO",
+  "DEBUG", "DEBUG1", "DEBUG2", "DEBUG3", "DEBUG4"
+};
 
+static const char* const TestLogs[] = {
+  "ERROR", "WARN", "INFO",
+  "DEBUG", "DEBUG1", "DEBUG2", "DEBUG3", "DEBUG4"
+};
 
-static const char* const TestLogs[] = { "ERROR", "WARNING",
-                                        "INFO", "DEBUG", "DEBUG1",
-                                        "DEBUG2", "DEBUG3", "DEBUG4"
-                                      };
-
-static const char* const VerbosityLevelArray[] = { "LOW", "MEDIUM", "HIGH"};
+static const char* const VerbosityLevelArray[] = {
+  "LOW", "MEDIUM", "HIGH"
+};
 
 
 TEST(FairToolsTestFatal, TestFatalError)
@@ -177,8 +178,8 @@ template <class T> class _TestFairLoggerBase : public T
       }
       regexString = regexString + outputString + ".*";
 
-      const boost::regex e(regexString);
-      return regex_match(resultString, e);
+      const std::regex e(regexString);
+      return std::regex_match(resultString, e);
     }
 };
 

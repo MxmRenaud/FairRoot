@@ -2,26 +2,24 @@
  *    Copyright (C) 2014 GSI Helmholtzzentrum fuer Schwerionenforschung GmbH    *
  *                                                                              *
  *              This software is distributed under the terms of the             * 
- *         GNU Lesser General Public Licence version 3 (LGPL) version 3,        *  
+ *              GNU Lesser General Public Licence (LGPL) version 3,             *  
  *                  copied verbatim in the file "LICENSE"                       *
  ********************************************************************************/
 /**
 * Runge-Kutte Track propagator
 * @author M. Al-Turany
-* @version 0.1
+* @version 0.2
 * @since 22.1.10
 */
 
 #ifndef RKPropagator
 #define RKPropagator
 
-#include "TObject.h"                    // for TObject
-
-#include "Rtypes.h"                     // for Double_t, etc
+#include "FairPropagator.h"
 
 class FairField;
 
-class FairRKPropagator : public TObject
+class FairRKPropagator : public FairPropagator
 {
 
   private:
@@ -39,7 +37,7 @@ class FairRKPropagator : public TObject
     @vecRKIn   Initial co-ords,direction cosines,momentum
     @vecOut    Output co-ords,direction cosines,momentum
     */
-    void Propagat(Double_t Charge, Double_t* vecRKIn, Double_t* Pos);
+    void Propagate(Double_t Charge, Double_t* vecRKIn, Double_t* Pos);
 
     /**Propagate to closest approach of a plane
     @CHARGE    Particle charge
@@ -50,10 +48,10 @@ class FairRKPropagator : public TObject
     @vecOut    Output co-ords,direction cosines,momentum
     */
 
-    void PropagatToPlane(Double_t Charge, Double_t* vecRKIn, Double_t* vec1, Double_t* vec2, Double_t* vec3, Double_t* vecOut);
+    void PropagateToPlane(Double_t Charge, Double_t* vecRKIn, Double_t* vec1, Double_t* vec2, Double_t* vec3, Double_t* vecOut);
 
     virtual ~FairRKPropagator();
-    ClassDef(FairRKPropagator, 1);
+    ClassDef(FairRKPropagator, 2);
 
 };
 

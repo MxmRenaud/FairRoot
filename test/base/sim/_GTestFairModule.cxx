@@ -2,7 +2,7 @@
  *    Copyright (C) 2014 GSI Helmholtzzentrum fuer Schwerionenforschung GmbH    *
  *                                                                              *
  *              This software is distributed under the terms of the             * 
- *         GNU Lesser General Public Licence version 3 (LGPL) version 3,        *  
+ *              GNU Lesser General Public Licence (LGPL) version 3,             *  
  *                  copied verbatim in the file "LICENSE"                       *
  ********************************************************************************/
 #include "FairModule.h"
@@ -17,7 +17,7 @@
 #include <fstream>
 #include <algorithm>
 #include <string>
-#include <boost/regex.hpp>
+#include <regex>
 
 //TEST(FairModuleTrueTest, TestBasicWorking)
 //{
@@ -58,8 +58,8 @@ TEST(FairModuleSetGeometryFile, CorrectAbsolutePath)
 
   // Test if screen output is as expected
   std::string regexString = "\\[DEBUG  \\] : using geometry file .*cave.geo";
-  const boost::regex e(regexString);
-  EXPECT_TRUE(regex_match(handler.GetCaptureLine(0), e));
+  const std::regex e(regexString);
+  EXPECT_TRUE(std::regex_match(handler.GetCaptureLine(0), e));
 
 }
 
@@ -101,8 +101,8 @@ TEST(FairModuleSetGeometryFile, CorrectGeomPathEnvVariable)
   regexString += the_path;
   regexString += "/";
   regexString += geofile;
-  const boost::regex e(regexString);
-  EXPECT_TRUE(regex_match(handler.GetCaptureLine(0), e));
+  const std::regex e(regexString);
+  EXPECT_TRUE(std::regex_match(handler.GetCaptureLine(0), e));
 
 }
 
@@ -138,9 +138,8 @@ TEST(FairModuleSetGeometryFile, WrongGeomPathEnvVariable)
   std::string regexString = "\\[DEBUG  \\] : geometry file ";
   regexString += geofile;
   regexString += " not found in GEOMPATH /tmp/";
-  const boost::regex e(regexString);
-
-  EXPECT_TRUE(regex_match(handler.GetCaptureLine(0), e));
+  const std::regex e(regexString);
+  EXPECT_TRUE(std::regex_match(handler.GetCaptureLine(0), e));
 
 
   char* workdir;
@@ -150,8 +149,8 @@ TEST(FairModuleSetGeometryFile, WrongGeomPathEnvVariable)
   regexString += workdir;
   regexString += "/geometry/";
   regexString += geofile;
-  const boost::regex f(regexString);
-  EXPECT_TRUE(regex_match(handler.GetCaptureLine(1), f));
+  const std::regex f(regexString);
+  EXPECT_TRUE(std::regex_match(handler.GetCaptureLine(1), f));
 
 }
 

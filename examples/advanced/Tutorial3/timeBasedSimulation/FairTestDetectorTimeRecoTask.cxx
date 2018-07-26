@@ -2,7 +2,7 @@
  *    Copyright (C) 2014 GSI Helmholtzzentrum fuer Schwerionenforschung GmbH    *
  *                                                                              *
  *              This software is distributed under the terms of the             * 
- *         GNU Lesser General Public Licence version 3 (LGPL) version 3,        *  
+ *              GNU Lesser General Public Licence (LGPL) version 3,             *  
  *                  copied verbatim in the file "LICENSE"                       *
  ********************************************************************************/
 #include "FairTestDetectorTimeRecoTask.h"
@@ -56,16 +56,16 @@ InitStatus FairTestDetectorTimeRecoTask::Init()
     FairRootManager* ioman = FairRootManager::Instance();
     if (!ioman)
     {
-      LOG(ERROR) <<"FairTestDetectorTimeRecoTask::Init: "
-		 << "RootManager not instantiated!" << FairLogger::endl;
+      LOG(error) <<"FairTestDetectorTimeRecoTask::Init: "
+		 << "RootManager not instantiated!";
         return kFATAL;
     }
 
     fDigiArray = static_cast<TClonesArray*>(ioman->GetObject("FairTestDetectorSortedDigi"));
     if (!fDigiArray)
     {
-      LOG(WARNING) << "FairTestDetectorTimeRecoTask::Init: "
-		   << "No Point array!" << FairLogger::endl;
+      LOG(warn) << "FairTestDetectorTimeRecoTask::Init: "
+		   << "No Point array!";
         return kERROR;
     }
 
@@ -88,21 +88,20 @@ void FairTestDetectorTimeRecoTask::Exec(Option_t* /*opt*/)
     if (FairRunAna::Instance()->IsTimeStamp())
     {
         fDigiArray = FairRootManager::Instance()->GetData("FairTestDetectorSortedDigi", fFunctor, fTime);
-        //    LOG(INFO) << "EventTime: " << FairRootManager::Instance()->GetEntryNr() << " " << FairRootManager::Instance()->GetEventTime()
-	    //          << FairLogger::endl;
+        //    LOG(info) << "EventTime: " << FairRootManager::Instance()->GetEntryNr() << " " << FairRootManager::Instance()->GetEventTime();
     }
 
 
     // fill the map
 
-    //LOG(INFO) << "NDigis: " << fDigiArray->GetEntries() << FairLogger::endl;
+    //LOG(info) << "NDigis: " << fDigiArray->GetEntries();
 
     for (int ipnt = 0; ipnt < fDigiArray->GetEntries(); ipnt++)
     {
         FairTestDetectorDigi* digi = static_cast<FairTestDetectorDigi*>(fDigiArray->At(ipnt));
         if (!digi)
         {
-	  LOG(WARNING)  << "No digi!" << FairLogger::endl;
+	  LOG(warn)  << "No digi!";
             continue;
         }
 

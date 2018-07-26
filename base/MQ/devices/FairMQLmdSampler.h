@@ -2,7 +2,7 @@
  *    Copyright (C) 2014 GSI Helmholtzzentrum fuer Schwerionenforschung GmbH    *
  *                                                                              *
  *              This software is distributed under the terms of the             * 
- *         GNU Lesser General Public Licence version 3 (LGPL) version 3,        *  
+ *              GNU Lesser General Public Licence (LGPL) version 3,             *  
  *                  copied verbatim in the file "LICENSE"                       *
  ********************************************************************************/
  /* 
@@ -32,7 +32,7 @@ extern "C"
 #include "FairMQLogger.h"
 #include "FairMQDevice.h"
 #include "FairMQMessage.h"
-#include "FairMQProgOptions.h" // device->fConfig
+#include <options/FairMQProgOptions.h> // device->fConfig
 
 class FairMQLmdSampler : public FairMQDevice
 {
@@ -71,7 +71,7 @@ class FairMQLmdSampler : public FairMQDevice
         SubEvtKey key(type, subType, procid, subCrate, control);
         if (fSubEventChanMap.count(key))
         {
-            LOG(WARN) << "FairMQLmdSampler : subevent header key '("
+            LOG(warn) << "FairMQLmdSampler : subevent header key '("
                       << type << "," << subType << "," << procid << "," << subCrate << "," << control << ")' has already been defined with channel name '" << fSubEventChanMap.at(key)
                       << "'. it will be overwritten with new channel name = " << channelName;
         }
@@ -81,11 +81,11 @@ class FairMQLmdSampler : public FairMQDevice
     void AddDir(const std::string& dir)
     {
         boost::filesystem::path directory = dir;
-    
+
         if (boost::filesystem::exists(directory))
         {
             boost::filesystem::directory_iterator end_itr;
-    
+
             for (boost::filesystem::directory_iterator itr(directory); itr != end_itr; ++itr)
             {
                 if (boost::filesystem::is_regular_file(itr->path()))
@@ -97,7 +97,7 @@ class FairMQLmdSampler : public FairMQDevice
         }
         else
         {
-            LOG(WARN) << "FairMQLmdSampler: directory '" << directory.string() << "' not found";
+            LOG(warn) << "FairMQLmdSampler: directory '" << directory.string() << "' not found";
         }
     }
     void AddFile(const std::string& fileName)
@@ -109,7 +109,7 @@ class FairMQLmdSampler : public FairMQDevice
         }
         else
         {
-            LOG(WARN) << "FairMQLmdSampler: file '" << fileName << "' not found";
+            LOG(warn) << "FairMQLmdSampler: file '" << fileName << "' not found";
         }
     }
 
@@ -123,24 +123,23 @@ class FairMQLmdSampler : public FairMQDevice
         fSubCrate = fConfig->GetValue<short>("lmd-sub-crate");
         fControl = fConfig->GetValue<short>("lmd-control");
         fChanName = fConfig->GetValue<std::string>("lmd-chan-name");
-    
+
         AddFile(fFilename);
         // combination of sub-event header value = one special channel
         // this channel MUST be defined in the json file for the MQ configuration
         AddSubEvtKey(fType, fSubType, fProcId, fSubCrate, fControl, fChanName);
-    
-    
+
         if (fFileNames.empty())
         {
             throw std::runtime_error(std::string("FairMQLmdSampler::InitTask: No files provided"));
         }
-    
+
         std::string name = fFileNames.at(fCurrentFile);
         if (!OpenNextFile(name))
         {
             throw std::runtime_error(std::string("FairMQLmdSampler::InitTask: cannot open file ") + name);
         }
-    
+
         fCurrentFile += 1;
         // Init Counters
         fNEvent = 0;
@@ -155,14 +154,14 @@ class FairMQLmdSampler : public FairMQDevice
                 break;
             }
         }
-        LOG(INFO) << "Sent " << fMsgCounter << " messages.";
+        LOG(info) << "Sent " << fMsgCounter << " messages.";
     }
 
     int ReadEvent()
     {
         void* evtptr = &fEvent;
         void* buffptr = &fBuffer;
-    
+
         //INTS4 f_evt_get_event(s_evt_channel*, INTS4**, INTS4**); // -> in f_evt.h
         /*-               GETEVT__SUCCESS=0 : success.                        */
         /*-               GETEVT__FRAGMENT=1: Event fragment found.           */
@@ -172,27 +171,27 @@ class FairMQLmdSampler : public FairMQDevice
         int status = f_evt_get_event(fInputChannel, static_cast<INTS4**>(evtptr), static_cast<INTS4**>(buffptr));
         //int fuEventCounter = fEvent->l_count;
         //int fCurrentMbsEventNo = fuEventCounter;
-        
-        // LOG(TRACE) << "STATUS = " << status;
+
+        // LOG(debug) << "STATUS = " << status;
         if (GETEVT__SUCCESS != status) // if f_evt_get_event not successfull close if nomore evt or look to another file and start again
         {
-            // LOG(TRACE) << "FairMQLmdSampler::ReadEvent()";
-    
+            // LOG(debug) << "FairMQLmdSampler::ReadEvent()";
+
             CHARS* sErrorString = NULL;
             f_evt_error(status, sErrorString, 0);
-    
+
             if (GETEVT__NOMORE == status)
             {
                 Close();
             }
-    
+
             // fCurrentFile incremented in InitTask once
             if (fCurrentFile >= static_cast<int>(fFileNames.size()))
             {
                 fStop = true;
                 return 1;
             }
-    
+
             std::string name = fFileNames.at(fCurrentFile);
             if (!OpenNextFile(name))
             {
@@ -204,7 +203,7 @@ class FairMQLmdSampler : public FairMQDevice
                 return ReadEvent();
             }
         }
-    
+
         //Store Start Times
         //if (fCurrentEvent==0 ) 
         //      Unpack((int*)fBuffer, sizeof(s_bufhe), -4, -4, -4, -4, -4);
@@ -212,7 +211,7 @@ class FairMQLmdSampler : public FairMQDevice
         //bool result = false;
         /*bool result = */
         //Unpack((int*)fEvent, sizeof(s_ve10_1), -2, -2, -2, -2, -2);
-    
+
         int nrSubEvts = f_evt_get_subevent(fEvent, 0, NULL, NULL, NULL);
         int sebuflength;
         short setype;
@@ -220,57 +219,57 @@ class FairMQLmdSampler : public FairMQDevice
         short seprocid;
         short sesubcrate;
         short secontrol;
-    
-        // LOG(TRACE) << "FairMQLmdSampler::ReadEvent => Found " << nrSubEvts << " Sub-event ";
+
+        // LOG(debug) << "FairMQLmdSampler::ReadEvent => Found " << nrSubEvts << " Sub-event ";
         //if (fCurrentEvent%10000==0)
         //cout << " -I- LMD_ANA:  evt# " <<  fCurrentEvent << "  n_subevt# " << nrSubEvts << " evt processed# " << fNEvent <<  " : " << fEvent->l_count << endl;
-    
+
         for (int i = 1; i <= nrSubEvts; i++)
         {
             void* SubEvtptr = &fSubEvent;
             void* EvtDataptr = &fEventData;
             int nrlongwords;
             status = f_evt_get_subevent(fEvent, i, static_cast<int**>(SubEvtptr), static_cast<int**>(EvtDataptr), &nrlongwords);
-    
+
             if (status)
             {
                 return 1;
             }
-    
+
             sebuflength = nrlongwords;
             setype = fSubEvent->i_type;
             sesubtype = fSubEvent->i_subtype;
             seprocid = fSubEvent->i_procid;
             sesubcrate = fSubEvent->h_subcrate;
             secontrol = fSubEvent->h_control;
-    
+
             //cout << setype << "  " << sesubtype << "  " << seprocid << "  " << sesubcrate << "  " << secontrol << endl;
-    
+
             // Data to send : fEventData
             SubEvtKey key(setype, sesubtype, seprocid, sesubcrate, secontrol);
-    
+
             if (!fSubEventChanMap.count(key))
             {
-                // LOG(TRACE) << "FairMQLmdSampler::ReadEvent: sub-event key not registered";
+                // LOG(debug) << "FairMQLmdSampler::ReadEvent: sub-event key not registered";
             }
             else
             {
-                // LOG(TRACE) << "array size = " << sebuflength;
-                // LOG(TRACE) << "fEventData = " << *fEventData;
-    
+                // LOG(debug) << "array size = " << sebuflength;
+                // LOG(debug) << "fEventData = " << *fEventData;
+
                 std::string chanName = fSubEventChanMap.at(key);
-                // LOG(TRACE) << "chanName = " << chanName;
-    
+                // LOG(debug) << "chanName = " << chanName;
+
                 FairMQParts parts;
-    
+
                 // send header
                 //std::unique_ptr<FairMQMessage> header(fTransportFactory->CreateMessage(fSubEvent, sizeof(fSubEvent), free_buffer, nullptr));
                 //fChannels.at(chanName).at(0).SendPart(header);
-    
+
                 int* arraySize = new int(sebuflength);
-    
+
                 parts.AddPart(NewMessage(arraySize, sizeof(int), [](void* /*data*/, void* hint) { delete static_cast<int*>(hint); }, arraySize));
-                parts.AddPart(NewMessage(fEventData, sebuflength, [](void* /*data*/, void* /*hint*/) { /*LOG(TRACE) << "empty deleter";*/ }, nullptr));
+                parts.AddPart(NewMessage(fEventData, sebuflength, [](void* /*data*/, void* /*hint*/) { /*LOG(debug) << "empty deleter";*/ }, nullptr));
                 Send(parts, chanName);
                 fMsgCounter++;
                 /*
@@ -283,16 +282,16 @@ class FairMQLmdSampler : public FairMQDevice
                 */
             }
         }
-    
+
         // Increment evt counters.
         fNEvent++;
         fCurrentEvent++;
-    
+
         /*if (! result)
         {
             return 2;
         }*/
-    
+
         return 0;
     }
     bool OpenNextFile(const std::string& fileName)
@@ -301,22 +300,22 @@ class FairMQLmdSampler : public FairMQDevice
         fInputChannel = new s_evt_channel;
         void* headptr = &fInfoHeader;
         INTS4 status;
-    
-        LOG(INFO) << "File " << fileName << " will be opened.";
-    
+
+        LOG(info) << "File " << fileName << " will be opened.";
+
         status = f_evt_get_open(inputMode, const_cast<char*>(fileName.c_str()), fInputChannel, static_cast<char**>(headptr), 1, 1);
-    
+
         if (status)
         {
-            LOG(ERROR) << "File " << fileName << " opening failed.";
+            LOG(error) << "File " << fileName << " opening failed.";
             return false;
         }
-    
-        LOG(INFO) << "File " << fileName << " opened.";
-    
+
+        LOG(info) << "File " << fileName << " opened.";
+
         // Decode File Header
         // bool result = Unpack((int*)fInfoHeader, sizeof(s_filhe), -4, -4, -4, -4, -4);
-    
+
         return true;
     }
 

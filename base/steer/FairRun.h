@@ -2,7 +2,7 @@
  *    Copyright (C) 2014 GSI Helmholtzzentrum fuer Schwerionenforschung GmbH    *
  *                                                                              *
  *              This software is distributed under the terms of the             * 
- *         GNU Lesser General Public Licence version 3 (LGPL) version 3,        *  
+ *              GNU Lesser General Public Licence (LGPL) version 3,             *  
  *                  copied verbatim in the file "LICENSE"                       *
  ********************************************************************************/
 #ifndef FAIRRUN_H
@@ -13,10 +13,12 @@
 #include "Rtypes.h"                     // for Int_t, Bool_t, etc
 #include "TMCtls.h"                     // for multi-threading
 
+#include "FairRootManager.h"
+
 class FairEventHeader;
 class FairFileHeader;
-class FairRootManager;
 class FairRuntimeDb;
+class FairSink;
 class FairTask;
 class TFile;
 class FairField;
@@ -61,14 +63,6 @@ class FairRun : public TNamed
      */
     virtual void    Run(Int_t NStart =0,Int_t NStop=0)=0;
     /**
-     * Set the output file name for analysis or simulation
-    */
-    virtual void    SetOutputFile(const char* fname);
-    /**
-     * Set the output file for analysis or simulation
-    */
-    virtual void    SetOutputFile(TFile* f);
-    /**
      *       Set the experiment dependent run header
      *       for each run
      */
@@ -82,22 +76,18 @@ class FairRun : public TNamed
       return fRtdb;
     }
     /**
-     * Set the  output file name without creating the file
+     * Set the sink
      */
-    void SetOutputFileName(const TString& name) {
-      fOutname = name;
+    void SetSink(FairSink* tempSink) {
+      fSink = tempSink;
+      fRootManager->SetSink(tempSink);
+      fUserOutputFileName = fSink->GetFileName();
     }
-    /**
-     * return a pointer to the output file
-     */
-    TFile* GetOutputFile() {
-      return fOutFile;
-    }
-    /**
-     * return a pointer to the output file
-     */
-    TString GetOutputFileName() {
-      return fOutname;
+     /**
+      * return a pointer to the sink
+      */
+    FairSink* GetSink() {
+      return fSink;
     }
     /**
      * return the run ID for the actul run
@@ -164,6 +154,28 @@ class FairRun : public TNamed
     //** Mark/Unmark event to be filled into output. Default is TRUE. */
     void MarkFill(Bool_t flag) { fMarkFill = flag; }
 
+    // vvvvvvvvvv depracted functions, replaced by FairSink vvvvvvvvvv
+    /**
+     * Set the output file name for analysis or simulation
+    */
+    virtual void    SetOutputFile(const char* fname);
+    /**
+     * Set the output file for analysis or simulation
+    */
+    virtual void    SetOutputFile(TFile* f);
+    /**
+     * Set the  output file name without creating the file
+     */
+    void SetOutputFileName(const TString& name);
+    TFile* GetOutputFile();
+    // ^^^^^^^^^^ depracted functions, replaced by FairSink ^^^^^^^^^^
+
+    /**
+     * New functions which allow to postpone creating a new Sink in MT
+     * to be kept after clean-up of deprecated functions above
+     */
+    void SetUserOutputFileName(const TString& name);
+    TString GetUserOutputFileName() const;
 
   private:
     FairRun(const FairRun& M);
@@ -180,12 +192,12 @@ class FairRun : public TNamed
     FairRuntimeDb*           fRtdb;
     /** Tasks used*/
     FairTask*                fTask;
-    /**Output file name*/
-    TString                  fOutname;
     /**IO manager */
     FairRootManager*         fRootManager;
-    /**Output file*/
-    TFile*                   fOutFile;
+    /**Output sink*/
+    FairSink*                fSink;
+    /**Output file name set by user*/
+    TString                  fUserOutputFileName;
     /**Run Id*/
     UInt_t                   fRunId;//!
     /** true for Anaylsis session*/

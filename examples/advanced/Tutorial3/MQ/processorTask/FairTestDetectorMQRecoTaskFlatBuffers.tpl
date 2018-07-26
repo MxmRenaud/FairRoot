@@ -8,12 +8,6 @@
 
 using namespace TestDetectorFlat;
 
-// helper function to clean up the object holding the data after it is transported.
-void free_builder(void* /*data*/, void* object)
-{
-    delete static_cast<flatbuffers::FlatBufferBuilder*>(object);
-}
-
 template <>
 void FairTestDetectorMQRecoTask<FairTestDetectorDigi, FairTestDetectorHit, TestDetectorFlat::DigiPayload, TestDetectorFlat::HitPayload>::Exec(Option_t* opt)
 {
@@ -27,12 +21,12 @@ void FairTestDetectorMQRecoTask<FairTestDetectorDigi, FairTestDetectorHit, TestD
     {
         new ((*fRecoTask->fDigiArray)[it - digis->begin()]) FairTestDetectorDigi((*it)->x(), (*it)->y(), (*it)->z(), (*it)->timestamp());
         static_cast<FairTestDetectorDigi*>(((*fRecoTask->fDigiArray)[it - digis->begin()]))->SetTimeStampError((*it)->timestampError());
-        // LOG(INFO) << (*it)->x() << " " << (*it)->y() << " " << (*it)->z() << " " << (*it)->timestamp() << " " << (*it)->timestampError();
+        // LOG(info) << (*it)->x() << " " << (*it)->y() << " " << (*it)->z() << " " << (*it)->timestamp() << " " << (*it)->timestampError();
     }
 
     if (!fRecoTask->fDigiArray)
     {
-        LOG(ERROR) << "FairTestDetectorMQRecoTask::Exec(): No Point array!";
+        LOG(error) << "FairTestDetectorMQRecoTask::Exec(): No Point array!";
     }
 
     fRecoTask->Exec(opt);
@@ -47,7 +41,7 @@ void FairTestDetectorMQRecoTask<FairTestDetectorDigi, FairTestDetectorHit, TestD
         {
             continue;
         }
-        // LOG(WARN) << " " << hit->GetDetectorID() << " " << hit->GetX() << " " << hit->GetY() << " " << hit->GetZ() << " " << hit->GetDx() << " " << hit->GetDy() << " " << hit->GetDz();
+        // LOG(warn) << " " << hit->GetDetectorID() << " " << hit->GetX() << " " << hit->GetY() << " " << hit->GetZ() << " " << hit->GetDx() << " " << hit->GetDy() << " " << hit->GetDz();
         HitBuilder hb(*builder);
         hb.add_detID(hit->GetDetectorID()); // detID:int
         hb.add_mcIndex(hit->GetRefIndex()); // GetRefIndex:int
@@ -67,7 +61,10 @@ void FairTestDetectorMQRecoTask<FairTestDetectorDigi, FairTestDetectorHit, TestD
 
     delete [] hits;
 
-    fPayload->Rebuild(builder->GetBufferPointer(), builder->GetSize(), free_builder, builder);
+    fPayload->Rebuild(builder->GetBufferPointer(),
+                      builder->GetSize(),
+                      [](void* /* data */, void* obj){ delete static_cast<flatbuffers::FlatBufferBuilder*>(obj); },
+                      builder);
 }
 
 #endif /* FLATBUFFERS */

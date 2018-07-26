@@ -1,8 +1,8 @@
  ################################################################################
  #    Copyright (C) 2014 GSI Helmholtzzentrum fuer Schwerionenforschung GmbH    #
  #                                                                              #
- #              This software is distributed under the terms of the             # 
- #         GNU Lesser General Public Licence version 3 (LGPL) version 3,        #  
+ #              This software is distributed under the terms of the             #
+ #              GNU Lesser General Public Licence (LGPL) version 3,             #  
  #                  copied verbatim in the file "LICENSE"                       #
  ################################################################################
 # Create a library called "libBase" which includes the source files given in
@@ -15,15 +15,18 @@ If(NOT DEFINED BUILD_MBS)
 EndIf(NOT DEFINED BUILD_MBS)
 
 Set(INCLUDE_DIRECTORIES
+  ${CMAKE_SOURCE_DIR}/logger
   ${CMAKE_SOURCE_DIR}/fairtools
-  ${CMAKE_SOURCE_DIR}/geobase 
-  ${CMAKE_SOURCE_DIR}/parbase 
+  ${CMAKE_SOURCE_DIR}/geobase
+  ${CMAKE_SOURCE_DIR}/parbase
   ${CMAKE_SOURCE_DIR}/base
   ${CMAKE_SOURCE_DIR}/base/steer
   ${CMAKE_SOURCE_DIR}/base/event
   ${CMAKE_SOURCE_DIR}/base/field
   ${CMAKE_SOURCE_DIR}/base/sim
   ${CMAKE_SOURCE_DIR}/base/source
+  ${CMAKE_SOURCE_DIR}/base/sink
+  ${FairLogger_INCDIR}
 )
 
 
@@ -41,13 +44,13 @@ EndIf(WITH_DBASE)
 
 If(BUILD_MBS)
   Set(INCLUDE_DIRECTORIES
-     ${INCLUDE_DIRECTORIES} 
+     ${INCLUDE_DIRECTORIES}
      ${CMAKE_SOURCE_DIR}/MbsAPI
   )
 EndIf(BUILD_MBS)
 
 Set(SYSTEM_INCLUDE_DIRECTORIES
-  ${ROOT_INCLUDE_DIR} 
+  ${ROOT_INCLUDE_DIR}
   ${Boost_INCLUDE_DIRS}
 )
 
@@ -59,7 +62,7 @@ Include_Directories(SYSTEM ${SYSTEM_INCLUDE_DIRECTORIES})
 Set(LINK_DIRECTORIES
   ${ROOT_LIBRARY_DIR}
 )
- 
+
 Link_Directories(${LINK_DIRECTORIES})
 
 # List of source files
@@ -95,9 +98,6 @@ sim/FairMCApplication.cxx
 sim/FairModule.cxx
 sim/FairParticle.cxx
 sim/FairPrimaryGenerator.cxx
-sim/FairGenericRootManager.cxx
-sim/FairRootManagerSim.cxx
-sim/FairRootManagerSimMT.cxx
 sim/FairRunIdGenerator.cxx
 sim/FairVolume.cxx
 sim/FairVolumeList.cxx
@@ -120,15 +120,20 @@ event/FairRecoEventHeader.cxx
 event/FairRunInfo.cxx
 event/FairTimeStamp.cxx
 event/FairTrackParam.cxx
+event/FairPrintFairLinks.cxx
 
 field/FairField.cxx
 field/FairFieldFactory.cxx
+field/FairPropagator.cxx
 field/FairRKPropagator.cxx
 
 source/FairSource.cxx
 source/FairFileSource.cxx
 source/FairMixedSource.cxx
 source/FairOnlineSource.cxx
+
+sink/FairSink.cxx
+sink/FairRootFileSink.cxx
 )
 
 If(BUILD_MBS)
@@ -142,28 +147,28 @@ If(BUILD_MBS)
       source/FairMbsStreamSource.cxx
    )
 
-  Set(NO_DICT_SRCS 
+  Set(NO_DICT_SRCS
       source/exitCli.c
       source/rclose.c
       source/swaplw.c
   )
 
-  Set(DEPENDENCIES 
+  Set(DEPENDENCIES
       ParBase GeoBase FairTools MbsAPI
-      Proof GeomPainter Geom VMC EG MathCore Physics 
+      Proof GeomPainter Geom VMC EG MathCore Physics
       Matrix Tree Hist RIO RHTTP Core
   )
 
   Set(DEFINITIONS BUILD_MBS)
 Else(BUILD_MBS)
-  Set(DEPENDENCIES 
-      ParBase GeoBase FairTools 
-      Proof GeomPainter Geom VMC EG MathCore Physics 
+  Set(DEPENDENCIES
+      ParBase GeoBase FairTools
+      Proof GeomPainter Geom VMC EG MathCore Physics
       Matrix Tree Hist RIO RHTTP Core
   )
 EndIf(BUILD_MBS)
 
-EXEC_PROGRAM( ${ROOT_CONFIG_EXECUTABLE} 
+EXEC_PROGRAM( ${ROOT_CONFIG_EXECUTABLE}
     ARGS "--has-gdml"
     OUTPUT_VARIABLE ROOT_HAS_GDML )
 
@@ -180,5 +185,3 @@ Set(LINKDEF FairLinkDef.h)
 Set(LIBRARY_NAME Base)
 
 GENERATE_LIBRARY()
-
- 

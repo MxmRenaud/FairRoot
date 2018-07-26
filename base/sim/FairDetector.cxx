@@ -2,7 +2,7 @@
  *    Copyright (C) 2014 GSI Helmholtzzentrum fuer Schwerionenforschung GmbH    *
  *                                                                              *
  *              This software is distributed under the terms of the             * 
- *         GNU Lesser General Public Licence version 3 (LGPL) version 3,        *  
+ *              GNU Lesser General Public Licence (LGPL) version 3,             *  
  *                  copied verbatim in the file "LICENSE"                       *
  ********************************************************************************/
 // -------------------------------------------------------------------------
@@ -23,6 +23,7 @@
 #include "TROOT.h"                      // for TROOT, gROOT
 #include "TRefArray.h"                  // for TRefArray
 #include "TString.h"                    // for TString
+#include "TGeoManager.h"                // for gGeoManager
 #include "TVirtualMC.h"                 // for TVirtualMC
 
 #include <stddef.h>                     // for NULL
@@ -37,7 +38,7 @@ FairDetector::FairDetector(const char* Name, Bool_t Active, Int_t DetId )
   TString lname( GetName());
   lname += "GeoPar";
   flGeoPar->SetName(lname.Data());
-  kGeoSaved = kFALSE;
+  fGeoSaved = kFALSE;
 
 
 }
@@ -80,6 +81,22 @@ FairDetector::FairDetector()
 {
 
 }
+
+// -------------------------------------------------------------------------
+
+void FairDetector::DefineSensitiveVolumes()
+{
+  TObjArray* volumes = gGeoManager->GetListOfVolumes();
+  TIter next(volumes);
+  TGeoVolume* volume;
+  while ( ( volume = static_cast<TGeoVolume*>(next()) ) ) {
+    if ( CheckIfSensitive(volume->GetName()) ) {
+      LOG(debug2)<<"Sensitive Volume "<< volume->GetName();
+      AddSensitiveVolume(volume);
+    }
+  }
+}
+
 // -------------------------------------------------------------------------
 
 void   FairDetector::Initialize()
@@ -87,6 +104,13 @@ void   FairDetector::Initialize()
 // Registers hits collection in Root manager;
 // sets sensitive volumes.
 // ---
+
+  // Define sensitive volumes if in MT
+  if ( gMC->IsMT() ) {
+    std::cout << "Define sensitive volume " << std::endl;
+    DefineSensitiveVolumes();
+  }
+
   Int_t NoOfEntries=svList->GetEntries();
   Int_t fMCid;
   FairGeoNode* fN;
@@ -105,14 +129,17 @@ void   FairDetector::Initialize()
     }
   }
 
+  // Initialize cached pointer to MC (on master in sequential mode)
+  fMC = TVirtualMC::GetMC();
+
 }
 // -------------------------------------------------------------------------
 
 void FairDetector::SaveGeoParams()
 {
 
-  if ( ! kGeoSaved  ) {
-    fLogger->Info(MESSAGE_ORIGIN,"Detector: %s Geometry parameters saved ... ", GetName());
+  if ( ! fGeoSaved  ) {
+    LOG(info) << "Detector: " << GetName() << " Geometry parameters saved ... ";
     TFolder* mf = dynamic_cast<TFolder*>(gROOT->FindObjectAny("cbmroot")) ;
     TFolder* stsf = NULL;
     if (mf ) { stsf = dynamic_cast<TFolder*> (mf->FindObjectAny(GetName())); }
@@ -120,7 +147,7 @@ void FairDetector::SaveGeoParams()
       TFolder* newf = stsf->AddFolder("Parameters","Detector parameters",NULL);
       newf->Add( flGeoPar ) ;
     }
-    kGeoSaved = kTRUE;
+    fGeoSaved = kTRUE;
   }
 }
 // -------------------------------------------------------------------------

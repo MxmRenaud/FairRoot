@@ -2,7 +2,7 @@
  *    Copyright (C) 2014 GSI Helmholtzzentrum fuer Schwerionenforschung GmbH    *
  *                                                                              *
  *              This software is distributed under the terms of the             * 
- *         GNU Lesser General Public Licence version 3 (LGPL) version 3,        *  
+ *              GNU Lesser General Public Licence (LGPL) version 3,             *  
  *                  copied verbatim in the file "LICENSE"                       *
  ********************************************************************************/
 // -------------------------------------------------------------------------
@@ -39,9 +39,8 @@ FairIonGenerator::FairIonGenerator()
    fVx(0), fVy(0), fVz(0),
    fIon(NULL),  fQ(0)
 {
-//  LOG(WARNING) << "FairIonGenerator: "
-//               << " Please do not use the default constructor! " 
-//               << FairLogger::endl;
+//  LOG(warn) << "FairIonGenerator: "
+//               << " Please do not use the default constructor! ";
 }
 // ------------------------------------------------------------------------
 
@@ -86,8 +85,7 @@ FairIonGenerator::FairIonGenerator(const Char_t* ionName, Int_t mult,
     }
   }
   if(fIon==0 && part==0 ) {
-    LOG(FATAL) << "Ion or Particle is not defined !" 
-	       << FairLogger::endl;
+    LOG(fatal) << "Ion or Particle is not defined !";
   }
 
 }
@@ -121,15 +119,29 @@ FairIonGenerator::FairIonGenerator(Int_t z, Int_t a, Int_t q, Int_t mult,
   fIon= new FairIon(buffer, z, a, q);
   FairRunSim* run = FairRunSim::Instance();
   if ( ! run ) {
-    LOG(ERROR) << "No FairRun instantised!" 
-	       << FairLogger::endl;
+    LOG(error) << "No FairRun instantised!";
   } else {
     run->AddNewIon(fIon);
   }
 }
 //_________________________________________________________________________
 
-
+FairIonGenerator::FairIonGenerator(const FairIonGenerator& rhs)
+  :FairGenerator(rhs),
+   fMult(rhs.fMult),
+   fPx(rhs.fPx), fPy(rhs.fPy), fPz(rhs.fPz),
+   fVx(rhs.fVx), fVy(rhs.fVy), fVz(rhs.fVz),
+   fIon(rhs.fIon), // CHECK
+   fQ(0)
+{
+  // fIon= new FairIon(buffer, z, a, q);
+  FairRunSim* run = FairRunSim::Instance();
+  if ( ! run ) {
+    LOG(error) << "No FairRun instantised!";
+  } else {
+    run->AddNewIon(fIon);
+  }
+}
 
 // -----   Destructor   ---------------------------------------------------
 FairIonGenerator::~FairIonGenerator()
@@ -163,27 +175,25 @@ Bool_t FairIonGenerator::ReadEvent(FairPrimaryGenerator* primGen)
 {
 
 // if ( ! fIon ) {
-//   LOG(WARNING) << "FairIonGenerator: No ion defined! " 
-//                << FairLogger::endl;
+//   LOG(warn) << "FairIonGenerator: No ion defined! ";
 //   return kFALSE;
 // }
 
   TParticlePDG* thisPart =
     TDatabasePDG::Instance()->GetParticle(fIon->GetName());
   if ( ! thisPart ) {
-    LOG(WARNING) << "FairIonGenerator: Ion " << fIon->GetName()
-		 << " not found in database!" << FairLogger::endl;
+    LOG(warn) << "FairIonGenerator: Ion " << fIon->GetName()
+		 << " not found in database!";
     return kFALSE;
   }
 
   int pdgType = thisPart->PdgCode();
 
-  LOG(INFO) << "FairIonGenerator: Generating " << fMult << " ions of type "
-	    << fIon->GetName() << " (PDG code " << pdgType << ")" 
-	    << FairLogger::endl;
-  LOG(INFO) << "    Momentum (" << fPx << ", " << fPy << ", " << fPz
+  LOG(info) << "FairIonGenerator: Generating " << fMult << " ions of type "
+	    << fIon->GetName() << " (PDG code " << pdgType << ")";
+  LOG(info) << "    Momentum (" << fPx << ", " << fPy << ", " << fPz
 	    << ") Gev from vertex (" << fVx << ", " << fVy
-	    << ", " << fVz << ") cm" << FairLogger::endl;
+	    << ", " << fVz << ") cm";
 
   for(Int_t i=0; i<fMult; i++) {
     primGen->AddTrack(pdgType, fPx, fPy, fPz, fVx, fVy, fVz);
@@ -195,5 +205,14 @@ Bool_t FairIonGenerator::ReadEvent(FairPrimaryGenerator* primGen)
 
 //_____________________________________________________________________________
 
+// ------------------------------------------------------------------------
+FairGenerator* FairIonGenerator::CloneGenerator() const
+{
+  // Clone for worker (used in MT mode only)
+
+  return new FairIonGenerator(*this);
+}
+
+//_____________________________________________________________________________
 
 ClassImp(FairIonGenerator)

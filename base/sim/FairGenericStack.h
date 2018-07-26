@@ -2,7 +2,7 @@
  *    Copyright (C) 2014 GSI Helmholtzzentrum fuer Schwerionenforschung GmbH    *
  *                                                                              *
  *              This software is distributed under the terms of the             * 
- *         GNU Lesser General Public Licence version 3 (LGPL) version 3,        *  
+ *              GNU Lesser General Public Licence (LGPL) version 3,             *  
  *                  copied verbatim in the file "LICENSE"                       *
  ********************************************************************************/
 // -------------------------------------------------------------------------
@@ -86,6 +86,9 @@ class FairGenericStack : public TVirtualMCStack
 
     /** Set the list of detectors to be used for filltering the stack*/
     void SetDetArrayList(TRefArray* detArray);
+
+    /** Allow a stack to perform a clean-up after a primary particle is finished **/
+    virtual void FinishPrimary() {}
 
     /** Resets arrays and stack and deletes particles and tracks **/
     virtual void Reset() {}

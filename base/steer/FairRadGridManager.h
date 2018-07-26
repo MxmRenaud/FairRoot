@@ -2,7 +2,7 @@
  *    Copyright (C) 2014 GSI Helmholtzzentrum fuer Schwerionenforschung GmbH    *
  *                                                                              *
  *              This software is distributed under the terms of the             * 
- *         GNU Lesser General Public Licence version 3 (LGPL) version 3,        *  
+ *              GNU Lesser General Public Licence (LGPL) version 3,             *  
  *                  copied verbatim in the file "LICENSE"                       *
  ********************************************************************************/
 // -------------------------------------------------------------------------
@@ -18,6 +18,7 @@
 #include "Rtypes.h"                     // for Float_t, Double_t, Int_t, etc
 #include "TLorentzVector.h"             // for TLorentzVector
 #include "TObjArray.h"                  // for TObjArray
+#include "TString.h"                    // for TString
 
 #include <iostream>                     // for basic_ostream::operator<<, etc
 
@@ -94,6 +95,8 @@ class FairRadGridManager
     Int_t fEstimator;
     /** the mesh */
     TObjArray* fMeshList;
+    /** output file name */
+    TString fOutputFileName;
 
     static Double_t fLtmp;
   public:
@@ -111,6 +114,9 @@ class FairRadGridManager
     void  Init();
     /**reset*/
     void  Reset();
+    /**set output file name*/
+    void    SetOutputFileName(TString tempString) { fOutputFileName = tempString; }
+    TString GetOutputFileName() { return fOutputFileName; }
     /**
      * This function is used to access the methods of the class.
      * @return Pointer to the singleton FairRadGridManager object, created

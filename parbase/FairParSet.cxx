@@ -2,7 +2,7 @@
  *    Copyright (C) 2014 GSI Helmholtzzentrum fuer Schwerionenforschung GmbH    *
  *                                                                              *
  *              This software is distributed under the terms of the             * 
- *         GNU Lesser General Public Licence version 3 (LGPL) version 3,        *  
+ *              GNU Lesser General Public Licence (LGPL) version 3,             *  
  *                  copied verbatim in the file "LICENSE"                       *
  ********************************************************************************/
 //*-- AUTHOR : Ilse Koenig
@@ -65,7 +65,7 @@ Bool_t FairParSet::init()
     } else { setInputVersion(-1,2); }
   }
   if (allFound) { return kTRUE; }
-  if (fLogger ) { fLogger->Error(MESSAGE_ORIGIN, "init() %s  not initialized",GetName()); }
+  LOG(error) << "init() " << GetName() << " not initialized";
   return kFALSE;
 }
 
@@ -77,7 +77,7 @@ Int_t FairParSet::write()
   // (calls internally the init function in the derived class)
   FairParIo* output=FairRuntimeDb::instance()->getOutput();
   if (output) { return write(output); }
-  if (fLogger) { fLogger->Error(MESSAGE_ORIGIN,"write() %s could not be written to output",GetName()); }
+  LOG(error) << "write() " << GetName() << " could not be written to output";
   return -1;
 }
 

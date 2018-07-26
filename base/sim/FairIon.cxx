@@ -2,7 +2,7 @@
  *    Copyright (C) 2014 GSI Helmholtzzentrum fuer Schwerionenforschung GmbH    *
  *                                                                              *
  *              This software is distributed under the terms of the             * 
- *         GNU Lesser General Public Licence version 3 (LGPL) version 3,        *  
+ *              GNU Lesser General Public Licence (LGPL) version 3,             *  
  *                  copied verbatim in the file "LICENSE"                       *
  ********************************************************************************/
 // -------------------------------------------------------------------------
@@ -50,7 +50,7 @@ FairIon::FairIon(const char* name, Int_t z, Int_t a, Int_t q, Double_t e,
 
   if (mass == 0.) { fMass = kProtonMass * Double_t(a); }
   else { fMass = mass; }
-  fLogger->Info(MESSAGE_ORIGIN, "New Ion %s Z=%d  A=%d  Charge=%d  Mass=%0.7f GeV ", name, z, a , q, fMass);
+  LOG(info) << "New Ion " << name << " Z=" << z << "  A=" << a << "  Charge=" << q << "  Mass=" << fMass << " GeV ";
 
 }
 // -------------------------------------------------------------------------

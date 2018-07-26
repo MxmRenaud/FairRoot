@@ -2,7 +2,7 @@
  *    Copyright (C) 2014 GSI Helmholtzzentrum fuer Schwerionenforschung GmbH    *
  *                                                                              *
  *              This software is distributed under the terms of the             * 
- *         GNU Lesser General Public Licence version 3 (LGPL) version 3,        *  
+ *              GNU Lesser General Public Licence (LGPL) version 3,             *  
  *                  copied verbatim in the file "LICENSE"                       *
  ********************************************************************************/
 #ifndef FAIR_ROOT_MANAGER_H
@@ -22,6 +22,7 @@
 #include <map>                          // for map, multimap, etc
 #include <queue>                        // for queue
 #include "FairSource.h"
+#include "FairSink.h"
 #include <typeinfo>
 #include <typeindex>
 #include <vector>
@@ -72,7 +73,7 @@ class FairRootManager : public TObject
     Int_t               CheckBranch(const char* BrName);
 
     
-    void                CloseOutFile() { if(fOutFile) { fOutFile->Close(); }}
+    void                CloseSink() { if(fSink) { fSink->Close(); }}
     /**Create a new file and save the current TGeoManager object to it*/
     void                CreateGeometryFile(const char* geofile);
     void                Fill();
@@ -95,10 +96,6 @@ class FairRootManager : public TObject
     /**Return the vector of branch names that were requested by tasks as input*/
     const std::vector<std::string>& GetReqBranchNames() const {return fReqBrNames;}
 
-      /** Return a pointer to the output Tree of type TTree */
-    TTree*              GetOutTree() {return fOutTree;}
-    /** Return a pointer to the output File of type TFile */
-    TFile*              GetOutFile() {return  fOutFile;}
     /**  Get the Object (container) for the given branch name,
          this method can be used to access the data of
          a branch that was created from a different
@@ -137,8 +134,6 @@ class FairRootManager : public TObject
     /** static access method */
     static FairRootManager* Instance();
 
-    TFile*            OpenOutFile(const char* fname="cbmsim.root");
-    TFile*            OpenOutFile(TFile* f);
     /**Read a single entry from background chain*/
     Int_t             ReadEvent(Int_t i=0);
     /** Read a single entry from each branch that is not read via TSBuffers*/
@@ -192,19 +187,11 @@ class FairRootManager : public TObject
   
     void                FillEventHeader(FairEventHeader* feh) { if ( fSource ) fSource->FillEventHeader(feh); } 
    
-    /**Set the output tree pointer*/
-    void                SetOutTree(TTree* fTree) { fOutTree=fTree;}
-
     /**Enables a last Fill command after all events are processed to store any data which is still in Buffers*/
     void        SetLastFill(Bool_t val = kTRUE) { fFillLastData=val;}
     /**When creating TTree from TFolder the fullpath of the objects is used as branch names
      * this method truncate the full path from the branch names
     */
-    void                TruncateBranchNames(TBranch* b, TString ffn);
-    /**When creating TTree from TFolder the fullpath of the objects is used as branch names
-     * this method truncate the full path from the branch names
-    */
-    void                TruncateBranchNames(TTree* fTree, const char* folderName);
 
     Int_t               Write(const char* name=0, Int_t option=0, Int_t bufsize=0);
     /** Write the current TGeoManager to file*/
@@ -220,7 +207,7 @@ class FairRootManager : public TObject
 
     void        StoreWriteoutBufferData(Double_t eventTime);
     void        StoreAllWriteoutBufferData();
-    void    DeleteOldWriteoutBufferData();
+    void        DeleteOldWriteoutBufferData();
 
     Int_t GetEntryNr() {return fEntryNr;}
     void SetEntryNr(Int_t val) {fEntryNr = val;}
@@ -241,7 +228,11 @@ class FairRootManager : public TObject
     void   SetSource(FairSource* tempSource) { fSource = tempSource; }    
     FairSource* GetSource() { return fSource;}
     Bool_t InitSource();
-    
+
+    void   SetSink(FairSink* tempSink) { fSink = tempSink; }
+    FairSink* GetSink() { return fSink;}
+    Bool_t InitSink();
+
     void                SetListOfFolders(TObjArray* ta){ fListFolder=ta; }
     TChain*             GetInChain ()                  { return fSourceChain;}
     TChain*             GetSignalChainNo(UInt_t i)     { return fSignalChainList[i]; }
@@ -255,6 +246,15 @@ class FairRootManager : public TObject
     Bool_t FinishRun() {return fFinishRun;}
 
     static char* GetTreeName();
+
+    /**public Members for multi-threading */
+    Int_t  GetInstanceId() const { return fId; }
+    void   UpdateFileName(TString& fileName);
+
+    // vvvvvvvvvv depracted functions, replaced by FairSink vvvvvvvvvv
+    /** Return a pointer to the output File of type TFile */
+    TFile* GetOutFile();
+    // ^^^^^^^^^^ depracted functions, replaced by FairSink ^^^^^^^^^^
   private:
 
     // helper struct since std::pair has problems with type_info
@@ -302,19 +302,15 @@ class FairRootManager : public TObject
     // private helper function to emit a warning
     void EmitMemoryBranchWrongTypeWarning(const char* brname, const char *typen1, const char *typen2) const;
 
-    Int_t       fOldEntryNr;
 //_____________________________________________________________________
     /**private Members*/
+    Int_t       fOldEntryNr;
     /**folder structure of output*/
     TFolder*                            fOutFolder;
     /**folder structure of input*/
     TFolder*                            fRootFolder;
     /** current time in ns*/
     Double_t                            fCurrentTime;
-    /**Output file */
-    TFile*                              fOutFile;
-    /**Output tree */
-    TTree*                              fOutTree;
     TObject**                           fObj2; //!
     /** Counter for the number of branches activiated */
     Int_t                               fNObj;//!
@@ -373,7 +369,9 @@ class FairRootManager : public TObject
     std::map<UInt_t, TChain*>            fSignalChainList;//!
 
     FairEventHeader                     *fEventHeader;
-    
+
+    FairSink                            *fSink;
+
     Bool_t fUseFairLinks; //!
     Bool_t fFinishRun; //!
     /** List of branches from input Chain or Tree*/
@@ -384,6 +382,13 @@ class FairRootManager : public TObject
     TRefArray* fListOfNonTimebasedBranches; //!
     /** Iterator for the list of branches used with no-time stamp in time-based session */
     TIterator* fListOfNonTimebasedBranchesIter; //!
+
+//_____________________________________________________________________
+    /**private Members for multi-threading */
+    // global static data members
+    static  Int_t     fgCounter;     // The counter of instances
+    // data members
+    Int_t             fId;           // This manager ID
 
     ClassDef(FairRootManager,12) // Root IO manager
 };
@@ -418,11 +423,13 @@ T FairRootManager::GetMemoryBranchAny(const char* brname) const {
 template<typename T>
 void FairRootManager::RegisterAny(const char* brname, T *& obj, bool persistence) {
   AddBranchToList(brname);
-  if (persistence) {
-    fPersistentBranchesAny.push_back(brname);
-  }
   // we are taking the address of the passed pointer
   AddMemoryBranchAny<T>(brname, &obj);
+  if (persistence) {
+    auto& ot = typeid(T*);
+    auto& pt = typeid(T);
+    fSink->RegisterAny(brname,ot,pt,&obj);
+  }
 }
 
 // this function serves as a factory (or lookup) for memory managed 

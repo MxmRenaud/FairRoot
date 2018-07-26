@@ -2,7 +2,7 @@
  *    Copyright (C) 2014 GSI Helmholtzzentrum fuer Schwerionenforschung GmbH    *
  *                                                                              *
  *              This software is distributed under the terms of the             * 
- *         GNU Lesser General Public Licence version 3 (LGPL) version 3,        *  
+ *              GNU Lesser General Public Licence (LGPL) version 3,             *  
  *                  copied verbatim in the file "LICENSE"                       *
  ********************************************************************************/
 // -------------------------------------------------------------------------
@@ -65,7 +65,7 @@ void FairTask::InitTask()
   if ( ! fActive ) { return; }
   InitStatus tStat = Init();
   if ( tStat == kFATAL ) {
-    fLogger->Fatal(MESSAGE_ORIGIN,"Initialization of Task %s failed fatally", fName.Data());
+    LOG(fatal) << "Initialization of Task " << fName.Data() << " failed fatally";
   }
   if ( tStat == kERROR ) { fActive = kFALSE; }
   FairMonitor::GetMonitor()->SetCurrentTask(0);
@@ -81,7 +81,7 @@ void FairTask::ReInitTask()
   if ( ! fActive ) { return; }
   InitStatus tStat = ReInit();
   if ( tStat == kFATAL ) {
-    fLogger->Fatal(MESSAGE_ORIGIN,"Reinitialization of Task %s failed fatally", fName.Data());
+    LOG(fatal) << "Reinitialization of Task " << fName.Data() << " failed fatally";
   }
   if ( tStat == kERROR ) { fActive = kFALSE; }
   ReInitTasks();
@@ -162,7 +162,7 @@ void FairTask::ExecuteTask(Option_t *option)
 
    if (fBreakin) return;
    if (gDebug > 1) {
-     LOG(INFO)<<"Execute task:"<<GetName()<<" : "<<GetTitle()<<FairLogger::endl;
+     LOG(info)<<"Execute task:"<<GetName()<<" : "<<GetTitle();
    }
    FairMonitor::GetMonitor()->StartMonitoring(this,"EXEC");
    Exec(option);
@@ -203,7 +203,7 @@ void FairTask::ExecuteTasks(Option_t *option)
       }
 
       if (gDebug > 1) {
-	LOG(INFO)<<"Execute task:"<<task->GetName()<<" : "<<task->GetTitle()<<FairLogger::endl;
+	LOG(info)<<"Execute task:"<<task->GetName()<<" : "<<task->GetTitle();
       }
       FairMonitor::GetMonitor()->StartMonitoring(task,"EXEC");
       task->Exec(option);

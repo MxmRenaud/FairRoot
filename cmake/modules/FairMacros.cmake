@@ -2,7 +2,7 @@
  #    Copyright (C) 2014 GSI Helmholtzzentrum fuer Schwerionenforschung GmbH    #
  #                                                                              #
  #              This software is distributed under the terms of the             # 
- #         GNU Lesser General Public Licence version 3 (LGPL) version 3,        #  
+ #              GNU Lesser General Public Licence (LGPL) version 3,             #  
  #                  copied verbatim in the file "LICENSE"                       #
  ################################################################################
   ###########################################
@@ -287,6 +287,7 @@ IF(FAIRROOT_FOUND)
 
 ELSE(FAIRROOT_FOUND)
   Set(BASE_INCLUDE_DIRECTORIES
+    ${CMAKE_SOURCE_DIR}/logger
     ${CMAKE_SOURCE_DIR}/fairtools
     ${CMAKE_SOURCE_DIR}/geobase
     ${CMAKE_SOURCE_DIR}/parbase
@@ -295,6 +296,7 @@ ELSE(FAIRROOT_FOUND)
     ${CMAKE_SOURCE_DIR}/base/event
     ${CMAKE_SOURCE_DIR}/base/field
     ${CMAKE_SOURCE_DIR}/base/sim
+    ${CMAKE_SOURCE_DIR}/base/sink
     ${CMAKE_SOURCE_DIR}/base/source
     ${CMAKE_SOURCE_DIR}/dbase
     ${CMAKE_SOURCE_DIR}/dbase/dbInterface

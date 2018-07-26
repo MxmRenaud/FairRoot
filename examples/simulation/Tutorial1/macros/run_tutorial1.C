@@ -2,10 +2,10 @@
  *    Copyright (C) 2014 GSI Helmholtzzentrum fuer Schwerionenforschung GmbH    *
  *                                                                              *
  *              This software is distributed under the terms of the             * 
- *         GNU Lesser General Public Licence version 3 (LGPL) version 3,        *  
+ *              GNU Lesser General Public Licence (LGPL) version 3,             *  
  *                  copied verbatim in the file "LICENSE"                       *
  ********************************************************************************/
-void run_tutorial1(Int_t nEvents = 10, TString mcEngine = "TGeant3")
+void run_tutorial1(Int_t nEvents = 10, TString mcEngine = "TGeant3", Bool_t isMT=false)
 {
   
   TString dir = getenv("VMCWORKDIR");
@@ -45,6 +45,8 @@ void run_tutorial1(Int_t nEvents = 10, TString mcEngine = "TGeant3")
 			 theta,
 			 nEvents);
 
+  TString geoFile = "geofile_" + mcEngine + "_full.root";
+
   // In general, the following parts need not be touched
   // ========================================================================
 
@@ -60,7 +62,8 @@ void run_tutorial1(Int_t nEvents = 10, TString mcEngine = "TGeant3")
   // -----   Create simulation run   ----------------------------------------
   FairRunSim* run = new FairRunSim();
   run->SetName(mcEngine);              // Transport engine
-  run->SetOutputFile(outFile);          // Output file
+  run->SetIsMT(isMT);                  // Multi-threading mode (Geant4 only)
+  run->SetSink(new FairRootFileSink(outFile));          // Output file
   FairRuntimeDb* rtdb = run->GetRuntimeDb();
   // ------------------------------------------------------------------------
   
@@ -110,7 +113,7 @@ void run_tutorial1(Int_t nEvents = 10, TString mcEngine = "TGeant3")
    
   // -----   Start run   ----------------------------------------------------
   run->Run(nEvents);
-  run->CreateGeometryFile("geofile_full.root");
+  run->CreateGeometryFile(geoFile);
   // ------------------------------------------------------------------------
   
   // -----   Finish   -------------------------------------------------------

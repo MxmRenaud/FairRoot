@@ -2,15 +2,14 @@
  #    Copyright (C) 2014 GSI Helmholtzzentrum fuer Schwerionenforschung GmbH    #
  #                                                                              #
  #              This software is distributed under the terms of the             #
- #         GNU Lesser General Public Licence version 3 (LGPL) version 3,        #
+ #              GNU Lesser General Public Licence (LGPL) version 3,             #
  #                  copied verbatim in the file "LICENSE"                       #
  ################################################################################
 
 set(INCLUDE_DIRECTORIES
     ${BASE_INCLUDE_DIRECTORIES}
-    ${CMAKE_SOURCE_DIR}/fairmq
-    ${CMAKE_SOURCE_DIR}/fairmq/options
-    ${CMAKE_SOURCE_DIR}/fairmq/tools
+    ${FairMQ_INCDIR}
+    ${FairMQ_INCDIR}/fairmq
 
     ${CMAKE_SOURCE_DIR}/base/MQ/devices
     ${CMAKE_SOURCE_DIR}/base/MQ/policies/Serialization
@@ -43,13 +42,6 @@ set(LINK_DIRECTORIES
     ${Boost_LIBRARY_DIRS}
 )
 
-if(DDS_PATH)
-  set(LINK_DIRECTORIES
-    ${LINK_DIRECTORIES}
-    ${DDS_PATH}/lib
-  )
-endif(DDS_PATH)
-
 link_directories(${LINK_DIRECTORIES})
 
 Set(SRCS
@@ -57,7 +49,7 @@ Set(SRCS
 )
 
 Set(DEPENDENCIES
-    Base MbsAPI MbsTutorial
+  Base MbsAPI MbsTutorial FairMQ::FairMQ
 )
 
 Set(LINKDEF LmdLinkDef.h)
@@ -89,7 +81,7 @@ ForEach(_file RANGE 0 ${_length})
     Set(EXE_NAME ${_name})
     Set(SRCS ${_src})
     Set(DEPENDENCIES
-        FairMQ
+        FairMQ::FairMQ
         BaseMQ
         ${Boost_THREAD_LIBRARY}
         ${Boost_SYSTEM_LIBRARY}

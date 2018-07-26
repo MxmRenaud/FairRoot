@@ -2,7 +2,7 @@
  *    Copyright (C) 2014 GSI Helmholtzzentrum fuer Schwerionenforschung GmbH    *
  *                                                                              *
  *              This software is distributed under the terms of the             * 
- *         GNU Lesser General Public Licence version 3 (LGPL) version 3,        *  
+ *              GNU Lesser General Public Licence (LGPL) version 3,             *  
  *                  copied verbatim in the file "LICENSE"                       *
  ********************************************************************************/
 // -------------------------------------------------------------------------
@@ -58,18 +58,17 @@ void FairTutorialDet2DigiPar::clear()
 void FairTutorialDet2DigiPar::printparams()
 {
 
-  LOG(INFO) <<"Print"<<FairLogger::endl;
-  LOG(INFO) << "ftutdetdigiparstation: " << ftutdetdigiparstation 
-	    << FairLogger::endl;
+  LOG(info) <<"Print";
+  LOG(info) << "ftutdetdigiparstation: " << ftutdetdigiparstation;
   Int_t size =  ftutdetdigiparsector.GetSize();
-  LOG(INFO) <<"size: " << size << FairLogger::endl;
+  LOG(info) <<"size: " << size;
   for ( Int_t i=0; i< size; i++) {
-    LOG(INFO) << i <<" :" << ftutdetdigiparsector.GetAt(i) << FairLogger::endl;
+    LOG(info) << i <<" :" << ftutdetdigiparsector.GetAt(i);
   }
   size =  ftutdetdigipar->GetSize();
-  LOG(INFO) <<"size: " << size << FairLogger::endl;
+  LOG(info) <<"size: " << size;
   for ( Int_t i=0; i< size; i++) {
-    LOG(INFO) << i <<" :" << ftutdetdigipar->GetAt(i) << FairLogger::endl;
+    LOG(info) << i <<" :" << ftutdetdigipar->GetAt(i);
   }
 
 }
@@ -78,8 +77,7 @@ void FairTutorialDet2DigiPar::printparams()
 void FairTutorialDet2DigiPar::putParams(FairParamList* l)
 {
   //   print();
-  LOG(INFO) << "I am in FairTutorialDet2DigiPar::putParams " 
-	    << FairLogger::endl;
+  LOG(info) << "I am in FairTutorialDet2DigiPar::putParams ";
   if (!l) { return; }
   l->add("FairTutorialDet2DigiStations", ftutdetdigiparstation);
   l->add("FairTutorialDet2DigiSectorsPerStation", ftutdetdigiparsector);
@@ -88,7 +86,7 @@ void FairTutorialDet2DigiPar::putParams(FairParamList* l)
     count_sectors+=ftutdetdigiparsector[i];
   }
   Int_t array_size = (count_sectors * 10 + ftutdetdigiparstation * 3);
-  LOG(INFO) << "Array Size: " << array_size << FairLogger::endl;
+  LOG(info) << "Array Size: " << array_size;
   /*   Float_t zwischen[array_size];
      for ( Int_t i=0; i< array_size; i++) {
        zwischen[i] = ftutdetdigipar.GetAt(i);
@@ -104,8 +102,7 @@ Bool_t FairTutorialDet2DigiPar::getParams(FairParamList* l)
 {
   //print();
 
-  LOG(INFO) << "I am in FairTutorialDet2DigiPar::getParams " 
-	    << FairLogger::endl;
+  LOG(info) << "I am in FairTutorialDet2DigiPar::getParams ";
 
   if (!l) { return kFALSE; }
   if ( ! l->fill("FairTutorialDet2DigiStations", &ftutdetdigiparstation) ) { return kFALSE; }
@@ -117,16 +114,14 @@ Bool_t FairTutorialDet2DigiPar::getParams(FairParamList* l)
   for ( Int_t i=0; i< ftutdetdigiparstation; i++) {
     count_sectors+=ftutdetdigiparsector[i];
   }
-  LOG(INFO) << "Total number of sectors: " << count_sectors
-	    <<FairLogger::endl;
+  LOG(info) << "Total number of sectors: " << count_sectors;
 
   Int_t array_size = (count_sectors * 10 + ftutdetdigiparstation * 3);
-  LOG(INFO) << "Array Size: " << array_size << FairLogger::endl;
+  LOG(info) << "Array Size: " << array_size;
   ftutdetdigipar->Set(array_size);
   //Float_t zwischen[array_size];
   if (!(l->fill("FairTutorialDet2DigiPar",ftutdetdigipar))) {
-    LOG(WARNING) << "Could not initialize FairTutorialDet2DigiPar"
-		 << FairLogger::endl;
+    LOG(warn) << "Could not initialize FairTutorialDet2DigiPar";
     return kFALSE;
   }
   //ftutdetdigipar.Set(array_size, zwischen);

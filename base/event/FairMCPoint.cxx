@@ -2,7 +2,7 @@
  *    Copyright (C) 2014 GSI Helmholtzzentrum fuer Schwerionenforschung GmbH    *
  *                                                                              *
  *              This software is distributed under the terms of the             * 
- *         GNU Lesser General Public Licence version 3 (LGPL) version 3,        *  
+ *              GNU Lesser General Public Licence (LGPL) version 3,             *  
  *                  copied verbatim in the file "LICENSE"                       *
  ********************************************************************************/
 #include "FairMCPoint.h"
@@ -58,14 +58,13 @@ FairMCPoint::~FairMCPoint() { }
 // -------------------------------------------------------------------------
 void FairMCPoint::Print(const Option_t*) const
 {
-  LOG(DEBUG) << "FairMC point for track " << fTrackID
-             << " in detector " << fDetectorID << FairLogger::endl;
-  LOG(DEBUG) << "Position (" << fX << ", " << fY << ", " << fZ
-             << ") cm" << FairLogger::endl;
-  LOG(DEBUG) << "    Momentum (" << fPx << ", " << fPy << ", " << fPz
-             << ") GeV" << FairLogger::endl;
-  LOG(DEBUG) << "    Time " << fTime << " ns,  Length " << fLength
-             << " cm,  Energy loss " << fELoss*1.0e06 << " keV" << FairLogger::endl;
+  LOG(debug) << "FairMC point for track " << fTrackID
+             << " in detector " << fDetectorID;
+  LOG(debug) << "Position (" << fX << ", " << fY << ", " << fZ << ") cm";
+  LOG(debug) << "    Momentum (" << fPx << ", " << fPy << ", " << fPz
+             << ") GeV";
+  LOG(debug) << "    Time " << fTime << " ns,  Length " << fLength
+             << " cm,  Energy loss " << fELoss*1.0e06 << " keV";
 }
 
 

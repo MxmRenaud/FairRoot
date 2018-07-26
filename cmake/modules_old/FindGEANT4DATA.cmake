@@ -2,7 +2,7 @@
  #    Copyright (C) 2014 GSI Helmholtzzentrum fuer Schwerionenforschung GmbH    #
  #                                                                              #
  #              This software is distributed under the terms of the             # 
- #         GNU Lesser General Public Licence version 3 (LGPL) version 3,        #  
+ #              GNU Lesser General Public Licence (LGPL) version 3,             #  
  #                  copied verbatim in the file "LICENSE"                       #
  ################################################################################
 # - Try to find GEANT4 data files
@@ -123,7 +123,7 @@ EndIf (G4RADIOACTIVEDATA)
 #If(DEFINED ENV{G4REALSURFACEDATA})
 #  Set(G4REALSURFACEDATA $ENV{G4REALSURFACEDATA})
 #Else()
-  FIND_PATH(G4REALSURFACEDATA NAMES EtchedTiO.dat PATHS
+  FIND_PATH(G4REALSURFACEDATA NAMES EtchedTiO.dat Rough_LUT.dat PATHS
     $ENV{G4REALSURFACEDATA}
     ${GEANT4_DATA}/RealSurface
     NO_DEFAULT_PATH

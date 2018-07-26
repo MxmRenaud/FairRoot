@@ -2,7 +2,7 @@
  *    Copyright (C) 2014 GSI Helmholtzzentrum fuer Schwerionenforschung GmbH    *
  *                                                                              *
  *              This software is distributed under the terms of the             * 
- *         GNU Lesser General Public Licence version 3 (LGPL) version 3,        *  
+ *              GNU Lesser General Public Licence (LGPL) version 3,             *  
  *                  copied verbatim in the file "LICENSE"                       *
  ********************************************************************************/
 void run_tutorial1_urqmd(Int_t nEvents = 2, TString mcEngine = "TGeant3")
@@ -35,6 +35,8 @@ void run_tutorial1_urqmd(Int_t nEvents = 2, TString mcEngine = "TGeant3")
 			 outDir.Data(),
 			 mcEngine.Data());
 
+  TString geoFile = outDir + "geofile_urqmd_" + mcEngine + "_full.root";
+
   // In general, the following parts need not be touched
   // ========================================================================
 
@@ -50,7 +52,7 @@ void run_tutorial1_urqmd(Int_t nEvents = 2, TString mcEngine = "TGeant3")
   // -----   Create simulation run   ----------------------------------------
   FairRunSim* run = new FairRunSim();
   run->SetName(mcEngine);              // Transport engine
-  run->SetOutputFile(outFile);          // Output file
+  run->SetSink(new FairRootFileSink(outFile));          // Output file
   FairRuntimeDb* rtdb = run->GetRuntimeDb();
   // ------------------------------------------------------------------------
   
@@ -94,7 +96,7 @@ void run_tutorial1_urqmd(Int_t nEvents = 2, TString mcEngine = "TGeant3")
    
   // -----   Start run   ----------------------------------------------------
   run->Run(nEvents);
-//  run->CreateGeometryFile("geofile_full.root");
+  run->CreateGeometryFile(geoFile);
   // ------------------------------------------------------------------------
   
   // -----   Finish   -------------------------------------------------------

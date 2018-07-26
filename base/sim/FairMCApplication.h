@@ -2,7 +2,7 @@
  *    Copyright (C) 2014 GSI Helmholtzzentrum fuer Schwerionenforschung GmbH    *
  *                                                                              *
  *              This software is distributed under the terms of the             * 
- *         GNU Lesser General Public Licence version 3 (LGPL) version 3,        *  
+ *              GNU Lesser General Public Licence (LGPL) version 3,             *  
  *                  copied verbatim in the file "LICENSE"                       *
  ********************************************************************************/
 // -------------------------------------------------------------------------
@@ -33,7 +33,7 @@ class FairPrimaryGenerator;
 class FairRadGridManager;
 class FairRadLenManager;
 class FairRadMapManager;
-class FairGenericRootManager;
+class FairRootManager;
 class FairTask;
 class FairTrajFilter;
 class FairVolume;
@@ -178,6 +178,8 @@ class FairMCApplication : public TVirtualMCApplication
     virtual void          Stepping();                                       // MC Application
     /** Stop the run*/
     virtual void          StopRun();
+    /** Stop the run*/
+    virtual void          StopMCRun();
     /**Define maximum radius for tracking (optional) */
     virtual Double_t      TrackingRmax() const;                             // MC Application
     /** Define maximum z for tracking (optional) */
@@ -185,12 +187,20 @@ class FairMCApplication : public TVirtualMCApplication
 
     void AddMeshList ( TObjArray* meshList );
 
+    /**
+    * Set if the current event should be written to the output file.
+    * The default value which is set back after each event is to store
+    * the event.
+    */
+    void                  SetSaveCurrentEvent(Bool_t set) {fSaveCurrentEvent=set;}
+
   private:
     // methods
     Int_t GetIonPdg(Int_t z, Int_t a) const;
 
     void UndoGeometryModifications();
 
+  protected:
     // data members
     /**List of active detector */
     TRefArray*           fActiveDetectors;
@@ -213,7 +223,7 @@ class FairMCApplication : public TVirtualMCApplication
     /** Simulation Stack  */
     FairGenericStack*     fStack; //!
     /**Pointer to thr I/O Manager */
-    FairGenericRootManager*  fRootManager; //!
+    FairRootManager*     fRootManager; //!
     /**List of sensetive volumes in all detectors*/
     TRefArray*           fSenVolumes; //!
     /**Magnetic Field Pointer*/
@@ -270,6 +280,9 @@ class FairMCApplication : public TVirtualMCApplication
     TVirtualMC*  fMC;
     /** Pointer to FairRunSim //! */
     FairRunSim*  fRun;
+
+    /** Flag if the current event should be saved */
+    Bool_t fSaveCurrentEvent;
     
     ClassDef(FairMCApplication,4)  //Interface to MonteCarlo application
 

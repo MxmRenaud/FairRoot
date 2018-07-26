@@ -2,17 +2,15 @@
  #    Copyright (C) 2014 GSI Helmholtzzentrum fuer Schwerionenforschung GmbH    #
  #                                                                              #
  #              This software is distributed under the terms of the             #
- #         GNU Lesser General Public Licence version 3 (LGPL) version 3,        #
+ #              GNU Lesser General Public Licence (LGPL) version 3,             #
  #                  copied verbatim in the file "LICENSE"                       #
  ################################################################################
 # Create a library called "libSerializationExample"
 
 set(INCLUDE_DIRECTORIES
     ${BASE_INCLUDE_DIRECTORIES}
-    ${CMAKE_SOURCE_DIR}/fairmq
-    ${CMAKE_SOURCE_DIR}/fairmq/devices
-    ${CMAKE_SOURCE_DIR}/fairmq/options
-    ${CMAKE_SOURCE_DIR}/fairmq/tools
+    ${FairMQ_INCDIR}
+    ${FairMQ_INCDIR}/fairmq
     ${CMAKE_SOURCE_DIR}/base/MQ
     ${CMAKE_SOURCE_DIR}/base/MQ/devices
     ${CMAKE_SOURCE_DIR}/base/MQ/policies/Sampler
@@ -76,17 +74,17 @@ link_directories(${LINK_DIRECTORIES})
 if(PROTOBUF_FOUND)
     add_custom_command(
         OUTPUT
-          ${CMAKE_CURRENT_BINARY_DIR}/Tuto7Payload.pb.h
-          ${CMAKE_CURRENT_BINARY_DIR}/Tuto7Payload.pb.cc
+          ${CMAKE_CURRENT_BINARY_DIR}/MyPayload.pb.h
+          ${CMAKE_CURRENT_BINARY_DIR}/MyPayload.pb.cc
         COMMAND
-          ${PROTOBUF_PROTOC_EXECUTABLE} -I=. --cpp_out=${CMAKE_CURRENT_BINARY_DIR} Tuto7Payload.proto
+          ${PROTOBUF_PROTOC_EXECUTABLE} -I=. --cpp_out=${CMAKE_CURRENT_BINARY_DIR} MyPayload.proto
         WORKING_DIRECTORY
           ${CMAKE_SOURCE_DIR}/examples/MQ/serialization/data_struct
         )
 
 set(NO_DICT_SRCS
     ${NO_DICT_SRCS}
-    ${CMAKE_CURRENT_BINARY_DIR}/Tuto7Payload.pb.cc
+    ${CMAKE_CURRENT_BINARY_DIR}/MyPayload.pb.cc
   )
 endif(PROTOBUF_FOUND)
 
@@ -101,7 +99,7 @@ set(LIBRARY_NAME SerializationExample)
 
 set(DEPENDENCIES
     Base
-    FairMQ
+    FairMQ::FairMQ
     BaseMQ
     ${Boost_THREAD_LIBRARY}
     ${Boost_SYSTEM_LIBRARY}

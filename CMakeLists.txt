@@ -2,7 +2,7 @@
  #    Copyright (C) 2014 GSI Helmholtzzentrum fuer Schwerionenforschung GmbH    #
  #                                                                              #
  #              This software is distributed under the terms of the             #
- #         GNU Lesser General Public Licence version 3 (LGPL) version 3,        #
+ #              GNU Lesser General Public Licence (LGPL) version 3,             #
  #                  copied verbatim in the file "LICENSE"                       #
  ################################################################################
 # The name of our project is "FairBase".  CMakeLists files in this project can
@@ -29,9 +29,15 @@ foreach(p
   endif()
 endforeach()
 
-# Set name of our project to "FAIRROOT". Has to be done
-# after check of cmake version
-project(FAIRROOT)
+# Set project version
+SET(FAIRROOT_MAJOR_VERSION 18)
+SET(FAIRROOT_MINOR_VERSION 0)
+SET(FAIRROOT_PATCH_VERSION 0)
+
+# Set name of our project to "FAIRROOT".
+# Has to be done after check of cmake version
+# This also sets ${FAIRROOT_VERSION} to the provided VERSION value, which would be empty if not set here explicitly
+project(FAIRROOT VERSION ${FAIRROOT_MAJOR_VERSION}.${FAIRROOT_MINOR_VERSION}.${FAIRROOT_PATCH_VERSION})
 
 # where to look first for cmake modules, before ${CMAKE_ROOT}/Modules/
 # is checked
@@ -77,9 +83,6 @@ include(WriteConfigFile)
 include(Dart)
 include(CheckCompiler)
 
-# COmpile TIme REducer helper
-include(cotire)
-
 #Check the compiler and set the compile and link flags
 Check_Compiler()
 
@@ -93,7 +96,10 @@ String(FIND ${CMAKE_CXX_FLAGS} "-std=c++11" POS_C++11)
 If(${POS_C++11} EQUAL -1)
   String(FIND ${CMAKE_CXX_FLAGS} "-std=c++14" POS_C++11)
   If(${POS_C++11} EQUAL -1)
-    Message(FATAL_ERROR "FairSoft wasn't compiled with c++11 or c++14 support. Please recompile FairSoft with a compiler which supports at least c++11.")
+    String(FIND ${CMAKE_CXX_FLAGS} "-std=c++17" POS_C++11)
+    If(${POS_C++11} EQUAL -1)
+      Message(FATAL_ERROR "FairSoft wasn't compiled with c++11, c++14 or c++17 support. Please recompile FairSoft with a compiler which supports at least c++11.")
+    EndIf()
   EndIf()
 EndIf()
 
@@ -150,8 +156,13 @@ CHECK_EXTERNAL_PACKAGE_INSTALL_DIR()
 # For example the framework can run without GEANT4, but ROOT is
 # mandatory
 
+if(SIMPATH)
+  set(CMAKE_PREFIX_PATH ${SIMPATH} ${CMAKE_PREFIX_PATH})
+endif()
+
 # FairRoot only supports ROOT6, so check which version is available
-find_package(ROOT 6.00.00 REQUIRED)
+find_package(ROOT 6.10.00 REQUIRED)
+find_package(FairLogger 1.1.0 REQUIRED)
 find_package(Pythia6)
 find_package(Pythia8)
 
@@ -227,12 +238,6 @@ endif(FAIRROOT_MODULAR_BUILD)
 
 find_package(CUDA)
 find_package(IWYU)
-find_package(ZeroMQ 4.1.3)
-find_package(nanomsg)
-find_package(Protobuf)
-find_package(Msgpack)
-find_package(FlatBuffers)
-find_package(DDS)
 if(NOT DISABLE_GO)
   find_package(Go 1.7)
 endif()
@@ -240,8 +245,10 @@ find_package(GSL)
 if(NOT DEFINED GTEST_ROOT)
   set(GTEST_ROOT ${SIMPATH})
 endif()
-find_package(GTest)
-
+find_package(FairMQ 1.2.0)
+# find_package(Protobuf)
+# find_package(msgpack)
+# find_package(FlatBuffers)
 
 If(WITH_DBASE)
   find_package(MYSQL)
@@ -269,19 +276,14 @@ Message("-- Looking for Boost ...")
 # for boost.
 Unset(Boost_INCLUDE_DIR CACHE)
 Unset(Boost_LIBRARY_DIRS CACHE)
-find_package(Boost 1.64 COMPONENTS thread system timer program_options random filesystem chrono exception regex serialization log log_setup atomic date_time)
+find_package(Boost 1.64 COMPONENTS thread system timer program_options random filesystem chrono exception regex
+    serialization log log_setup atomic date_time signals)
 If (Boost_FOUND)
   Set(Boost_Avail 1)
   Set(LD_LIBRARY_PATH ${LD_LIBRARY_PATH} ${Boost_LIBRARY_DIR})
 Else (Boost_FOUND)
   Set(Boost_Avail 0)
 EndIf (Boost_FOUND)
-
-# Set the library version in the main CMakeLists.txt
-SET(FAIRROOT_MAJOR_VERSION 17)
-SET(FAIRROOT_MINOR_VERSION 10)
-SET(FAIRROOT_PATCH_VERSION 00)
-SET(FAIRROOT_VERSION "${FAIRROOT_MAJOR_VERSION}.${FAIRROOT_MINOR_VERSION}.${FAIRROOT_PATCH_VERSION}")
 
 If(ROOT_FOUND_VERSION LESS 59999)
 #  If(FAIRROOT_MODULAR_BUILD)
@@ -302,6 +304,9 @@ Else()
       SOVERSION "${FAIRROOT_MAJOR_VERSION}"
   )
 EndIf()
+
+
+configure_file(${CMAKE_SOURCE_DIR}/cmake/scripts/FairRootConfigVersion.cmake.in "${CMAKE_BINARY_DIR}/FairRootConfigVersion.cmake" @ONLY)
 
 # Load the macro to generate the needed version info at compile time
 Generate_Version_Info()
@@ -336,19 +341,17 @@ add_subdirectory (generators)
 If(GEANT3_FOUND)
  add_subdirectory (geane)
  add_subdirectory (trackbase)
- add_subdirectory (eventdisplay)
 EndIf ()
+add_subdirectory (eventdisplay)
 
 add_subdirectory (MbsAPI)
 add_subdirectory (datamatch)
 
-If (Boost_FOUND AND POS_C++11 AND ZeroMQ_FOUND AND HAS_CXX11_PATTERN1)
-  Message(STATUS "Required C++11 feature(s), boost and ZeroMQ libraries found. FairMQ will be built.")
-  add_subdirectory (fairmq)
+If (FairMQ_FOUND)
   add_subdirectory (base/MQ)
   add_subdirectory (parmq)
 Else ()
-  Message(STATUS "Building of the FairMQ library is switched off due to at least one of the following reasons : one or more C++11 feature(s), ZeroMQ or the necessary boost libraries couldn't be found on the system.")
+  Message(STATUS "base/MQ and parmq will not be built, because FairMQ was not found.")
 EndIf ()
 
 Option(BUILD_DOXYGEN "Build Doxygen" OFF)
@@ -427,7 +430,7 @@ If(GIT_FOUND AND EXISTS "${CMAKE_SOURCE_DIR}/.git")
                   WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
                  )
 Else()
-  Set(FAIRROOT_GIT_VERSION v-17.10)
+  Set(FAIRROOT_GIT_VERSION v${FAIRROOT_MAJOR_VERSION}.${FAIRROOT_MINOR_VERSION}.${FAIRROOT_PATCH_VERSION})
 EndIf()
 Configure_File(${CMAKE_SOURCE_DIR}/cmake/scripts/fairroot-config.in ${CMAKE_BINARY_DIR}/fairroot-config @ONLY)
 

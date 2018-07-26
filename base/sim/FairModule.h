@@ -2,7 +2,7 @@
  *    Copyright (C) 2014 GSI Helmholtzzentrum fuer Schwerionenforschung GmbH    *
  *                                                                              *
  *              This software is distributed under the terms of the             * 
- *         GNU Lesser General Public Licence version 3 (LGPL) version 3,        *  
+ *              GNU Lesser General Public Licence (LGPL) version 3,             *  
  *                  copied verbatim in the file "LICENSE"                       *
  ********************************************************************************/
 #ifndef FAIRMODULE_H
@@ -34,6 +34,7 @@ class TGeoNode;
 class TGeoVolume;
 class TGeoMedium;
 class TRefArray;
+class TVirtualMC;
 
 /**
  * Base class for constructing all detecors and passive volumes
@@ -68,13 +69,16 @@ class FairModule:  public TNamed
     /**method called from the MC application to set optical geometry properties*/
     virtual void        ConstructOpGeometry();
     /**construct geometry from root files (TGeo)*/
-    virtual void        ConstructRootGeometry();
+    virtual void        ConstructRootGeometry(TGeoMatrix* shiftM=NULL);
     /**construct geometry from standard ASSCII files (Hades Format)*/
     virtual void        ConstructASCIIGeometry();
     /** Modify the geometry for the simulation run using methods of the Root geometry package */
     virtual void        ModifyGeometry() {;}
     /**construct geometry from GDML files*/
     virtual void        ConstructGDMLGeometry(TGeoMatrix*);
+    /** custom settings of processes and cuts for media to be forwarded to the 
+     ** detector simulation */
+    virtual void        SetSpecialPhysicsCuts() {;}
     /** Clone this object (used in MT mode only)*/
     virtual FairModule* CloneModule() const;
     /** Init worker run (used in MT mode only) */
@@ -118,13 +122,13 @@ class FairModule:  public TNamed
     TList* GetListOfGeoPar() { return flGeoPar;}
 
     /**list of volumes in a simulation session*/
-    static              FairVolumeList*   vList; //!
+    static thread_local FairVolumeList*   vList; //!
     /**total number of volumes in a simulaion session*/
-    static Int_t        fNbOfVolumes;  //!
+    static thread_local Int_t        fNbOfVolumes;  //!
     /**list of all sensitive volumes in  a simulaion session*/
-    static TRefArray*   svList;   //!
+    static thread_local TRefArray*   svList;   //!
 
-    static TArrayI*     volNumber; //!
+    static thread_local TArrayI*     volNumber; //!
     TString             fMotherVolumeName; //!
     FairVolume*   getFairVolume(FairGeoNode* fNode);
     void    AddSensitiveVolume(TGeoVolume* v);
@@ -147,7 +151,8 @@ class FairModule:  public TNamed
     Int_t               fNbOfSensitiveVol; //!
     Int_t               fVerboseLevel;
     TList*              flGeoPar; //!  list of Detector Geometry parameters
-    Bool_t              kGeoSaved; //! flag for initialisation
+    Bool_t              fGeoSaved; //! flag for initialisation
+    TVirtualMC*         fMC; //! cahed pointer to MC (available only after initialization)
 
     ClassDef( FairModule,4)
 };
@@ -172,8 +177,8 @@ void FairModule::ConstructASCIIGeometry(T dataType1, TString containerName, U)
   dataType1 = *MGeo;
 
   if ( "" != containerName) {
-    LOG(INFO) << "Add GeoNodes for "<< MGeo->getDescription()
-              << " to container " << containerName << FairLogger::endl;
+    LOG(info) << "Add GeoNodes for "<< MGeo->getDescription()
+              << " to container " << containerName;
 
     //    U par=(U)(rtdb->getContainer(containerName));
     U*      par=static_cast<U*>(rtdb->getContainer(containerName));

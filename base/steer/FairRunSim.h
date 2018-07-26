@@ -2,7 +2,7 @@
  *    Copyright (C) 2014 GSI Helmholtzzentrum fuer Schwerionenforschung GmbH    *
  *                                                                              *
  *              This software is distributed under the terms of the             * 
- *         GNU Lesser General Public Licence version 3 (LGPL) version 3,        *  
+ *              GNU Lesser General Public Licence (LGPL) version 3,             *  
  *                  copied verbatim in the file "LICENSE"                       *
  ********************************************************************************/
 #ifndef FAIRRUNSIM_H
@@ -18,6 +18,7 @@
 #include "TObjArray.h"                  // for TObjArray
 #include "TString.h"                    // for TString
 #include "TMCtls.h"                     // for multi-threading
+#include <functional>
 
 class FairField;
 class FairMCEventHeader;
@@ -90,6 +91,9 @@ class FairRunSim : public FairRun
     /**switch On/Off the track visualisation */
     void SetStoreTraj(Bool_t storeTraj=kTRUE) {fStoreTraj = storeTraj;}
 
+    /**Return the switch for the track visualisation */
+    Bool_t GetStoreTraj() const {return fStoreTraj;}
+
     /**switch On/Off the debug mode */
     void SetTrackingDebugMode( Bool_t set ) { if (fApp) { fApp->SetTrackingDebugMode( set ); } }
 
@@ -151,7 +155,18 @@ class FairRunSim : public FairRun
     /**Get beam energy flag */
     Bool_t UseBeamMom() {return fUseBeamMom;}
     void SetFieldContainer();
-  private:
+
+    void SetSimSetup(std::function<void()> f) { fSimSetup = f; fUseSimSetupFunction = true; }
+
+    void SetIsMT(Bool_t isMT) { fIsMT = isMT; }
+    Bool_t IsMT() const { return fIsMT; }
+
+    void SetImportTGeoToVMC(Bool_t v) { fImportTGeoToVMC = v; }
+    Bool_t IsImportTGeoToVMC() const { return fImportTGeoToVMC; }
+
+    void StopMCRun() { fApp->StopMCRun(); }
+
+ private:
     FairRunSim(const FairRunSim& M);
     FairRunSim& operator= (const  FairRunSim&) {return *this;}
     void SetMCConfig();
@@ -183,8 +198,11 @@ class FairRunSim : public FairRun
     TObjArray*             fMeshList; //!                          /** radiation grid scoring
     TString                fUserConfig; //!                        /** Macro for geant configuration*/
     TString                fUserCuts; //!                          /** Macro for geant cuts*/
-
-
+    Bool_t                 fIsMT; //!                              /** MT mode option (Geant4 only)*/
+    Bool_t                 fImportTGeoToVMC; //!                   /** Allow importing TGeometry to VMC */
+    std::function<void()>    fSimSetup; //!         /** A user provided function to do sim setup / instead of using macros **/ 
+    bool                     fUseSimSetupFunction = false;
+    
     ClassDef(FairRunSim ,2)
 
 };

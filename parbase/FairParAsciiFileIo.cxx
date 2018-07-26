@@ -2,7 +2,7 @@
  *    Copyright (C) 2014 GSI Helmholtzzentrum fuer Schwerionenforschung GmbH    *
  *                                                                              *
  *              This software is distributed under the terms of the             * 
- *         GNU Lesser General Public Licence version 3 (LGPL) version 3,        *  
+ *              GNU Lesser General Public Licence (LGPL) version 3,             *  
  *                  copied verbatim in the file "LICENSE"                       *
  ********************************************************************************/
 //*-- AUTHOR : Ilse Koenig
@@ -82,7 +82,7 @@ Bool_t FairParAsciiFileIo::open(const Text_t* fname, const Text_t* status)
 Bool_t FairParAsciiFileIo::open(const TList* fnamelist, const Text_t* status)
 {
   if ( 0 == fnamelist->GetEntries() ) {
-    LOG(ERROR) << "The defined list of parameter files is empty. There are no parameters initialized from the ASCII files." << FairLogger::endl; 
+    LOG(error) << "The defined list of parameter files is empty. There are no parameters initialized from the ASCII files."; 
     return kFALSE;
   }
   TString outFileName = gSystem->WorkingDirectory();
@@ -97,9 +97,10 @@ Bool_t FairParAsciiFileIo::open(const TList* fnamelist, const Text_t* status)
   while((string = static_cast<TObjString*>(myIter.Next()))) {
     // check if the file exist
     // if file exist return value is false
-    if ( gSystem->AccessPathName(string->GetString())) {
-      LOG(FATAL) << "Parameter file " << string->GetString() << " does not exist." << FairLogger::endl;
-    }
+    TString strParPath = string->GetString();
+    gSystem->ExpandPathName(strParPath);
+    if (gSystem->AccessPathName(strParPath))
+        LOG(FATAL) << "Parameter file " << strParPath << " does not exist." << FairLogger::endl;
     //    cout <<  string->GetString() <<endl;
     catCommand += string->GetString();
     catCommand += " ";

@@ -2,7 +2,7 @@
  *    Copyright (C) 2014 GSI Helmholtzzentrum fuer Schwerionenforschung GmbH    *
  *                                                                              *
  *              This software is distributed under the terms of the             *
- *         GNU Lesser General Public Licence version 3 (LGPL) version 3,        *
+ *              GNU Lesser General Public Licence (LGPL) version 3,             *
  *                  copied verbatim in the file "LICENSE"                       *
  ********************************************************************************/
 // -------------------------------------------------------------------------
@@ -61,7 +61,7 @@ Bool_t gFRAIsInterrupted;
 //_____________________________________________________________________________
 void FRA_handler_ctrlc(int)
 {
-  LOG(INFO) << "*********** CTRL C PRESSED *************" << FairLogger::endl;
+  LOG(info) << "*********** CTRL C PRESSED *************";
   gFRAIsInterrupted = kTRUE;
 }
 //_____________________________________________________________________________
@@ -121,20 +121,17 @@ FairRunAna::~FairRunAna()
 void  FairRunAna::SetGeomFile(const char* GeoFileName)
 {
   if (fIsInitialized) {
-    LOG(FATAL) << "Geometry file has to be set before Run::Init !"
-	       << FairLogger::endl;
+    LOG(fatal) << "Geometry file has to be set before Run::Init !";
     exit(-1);
   } else {
 
     TFile* CurrentFile=gFile;
     fInputGeoFile= TFile::Open(GeoFileName);
     if (fInputGeoFile->IsZombie()) {
-      LOG(ERROR) << "Error opening Geometry Input file"
-		 << FairLogger::endl;
+      LOG(error) << "Error opening Geometry Input file";
       fInputGeoFile=0;
     }
-    LOG(INFO) << "Opening Geometry input file: " << GeoFileName
-	      << FairLogger::endl;
+    LOG(info) << "Opening Geometry input file: " << GeoFileName;
     fLoadGeo=kTRUE;
     gFile=CurrentFile;
   }
@@ -146,7 +143,7 @@ void FairRunAna::Init()
 {
 
   if (fIsInitialized) {
-    LOG(FATAL) << "Error Init is already called before!" << FairLogger::endl;
+    LOG(fatal) << "Error Init is already called before!";
     exit(-1);
   } else {
     fIsInitialized=kTRUE;
@@ -155,7 +152,8 @@ void FairRunAna::Init()
 
   // Check if we have an input file to be used
   fInFileIsOpen = fRootManager->InitSource();
-
+  fRootManager->InitSink();
+  
  //Load Geometry from user file
   if (fLoadGeo) {
     if (fInputGeoFile!=0) { //First check if the user has a separate Geo file!
@@ -177,7 +175,7 @@ void FairRunAna::Init()
   if (fInFileIsOpen) {
     //check that the geometry was loaded if not try all connected files!
     if (fLoadGeo && gGeoManager==0) {
-      LOG(INFO) << "Geometry was not found in the input file we will look in the friends if any!" << FairLogger::endl;
+      LOG(info) << "Geometry was not found in the input file we will look in the friends if any!";
       TFile* currentfile= gFile;
       TFile* nextfile=0;
       TSeqCollection* fileList=gROOT->GetListOfFiles();
@@ -227,7 +225,7 @@ void FairRunAna::Init()
   //  if(par && fInputFile) {
   if (par && fInFileIsOpen) {
 
-    LOG(INFO) << "Parameter and input file are available, Assure that basic info is there for the run!" << FairLogger::endl;
+    LOG(info) << "Parameter and input file are available, Assure that basic info is there for the run!";
     fRootManager->ReadEvent(0);
 
 //    fEvtHeader = GetEventHeader();
@@ -248,8 +246,7 @@ void FairRunAna::Init()
     //fRtdb->initContainers( fRunId );
 
   } else {  //end----- if(fMixedInput)
-    LOG(INFO) << "Initializing without input file or Mixed input"
-	      << FairLogger::endl;
+    LOG(info) << "Initializing without input file or Mixed input";
     FairEventHeader* evt = GetEventHeader();
     evt->Register(fStoreEventHeader);
     FairRunIdGenerator genid;
@@ -286,11 +283,6 @@ void FairRunAna::Init()
   fRootManager->UpdateListOfTimebasedBranches();
 
   // create the output tree after tasks initialisation
-  fOutFile->cd();
-  TTree* outTree =new TTree(FairRootManager::GetTreeName(), "/cbmout", 99);
-  fRootManager->TruncateBranchNames(outTree, "cbmout");
-  fRootManager->SetOutTree(outTree);
-  fRootManager->CreatePersistentBranchesAny();
   fRootManager->WriteFolder();
   fRootManager->WriteFileHeader(fFileHeader);
 }
@@ -334,10 +326,10 @@ void FairRunAna::Run(Int_t Ev_start, Int_t Ev_end)
           Ev_end = MaxAllowed;
         }
       }
-      LOG(INFO) << "FairRunAna::Run() After checking, the run will run from event " << Ev_start << " to " << Ev_end << "." << FairLogger::endl;
+      LOG(info) << "FairRunAna::Run() After checking, the run will run from event " << Ev_start << " to " << Ev_end << ".";
     }
     else {
-      LOG(INFO) << "FairRunAna::Run() continue running without stop" << FairLogger::endl;
+      LOG(info) << "FairRunAna::Run() continue running without stop";
     }
 
     if (fGenerateRunInfo) {
@@ -353,14 +345,14 @@ void FairRunAna::Run(Int_t Ev_start, Int_t Ev_end)
       signal(SIGINT, FRA_handler_ctrlc);
 
       if ( gFRAIsInterrupted ) {
-        LOG(WARNING) << "FairRunAna::Run() Event loop was interrupted by the user!" << FairLogger::endl;
+        LOG(warn) << "FairRunAna::Run() Event loop was interrupted by the user!";
         break;
       }
 
       readEventReturn = fRootManager->ReadEvent(i);
 
       if ( readEventReturn != 0 ) {
-        LOG(WARNING) << "FairRunAna::Run() fRootManager->ReadEvent(" << i << ") returned " << readEventReturn << ". Breaking the event loop" << FairLogger::endl;
+        LOG(warn) << "FairRunAna::Run() fRootManager->ReadEvent(" << i << ") returned " << readEventReturn << ". Breaking the event loop";
         break;
       }
 
@@ -429,10 +421,10 @@ void FairRunAna::RunEventReco(Int_t Ev_start, Int_t Ev_end)
 	Ev_end = MaxAllowed;
       }
     }
-    LOG(INFO) << "FairRunAna::Run() After checking, the run will run from event " << Ev_start << " to " << Ev_end << "." << FairLogger::endl;
+    LOG(info) << "FairRunAna::Run() After checking, the run will run from event " << Ev_start << " to " << Ev_end << ".";
   }
   else {
-    LOG(INFO) << "FairRunAna::Run() continue running without stop" << FairLogger::endl;
+    LOG(info) << "FairRunAna::Run() continue running without stop";
   }
 
   if (fGenerateRunInfo) {
@@ -582,7 +574,7 @@ void FairRunAna::RunOnLmdFiles(UInt_t NStart, UInt_t NStop)
   if(NStart==0 && NStop==0) {
     NStart=0;
     NStop=1000000000;
-    LOG(INFO) << " Maximum number of event is set to 1E9" << FairLogger::endl;
+    LOG(info) << " Maximum number of event is set to 1E9";
   }
   for (UInt_t i=NStart; i< NStop; i++) {
     if ( fFinishProcessingLMDFile ) {
@@ -633,14 +625,14 @@ void FairRunAna::TerminateRun()
 {
   fRootManager->StoreAllWriteoutBufferData();
   fTask->FinishTask();
-  gDirectory->SetName(fRootManager->GetOutFile()->GetName());
+  //  gDirectory->SetName(fRootManager->GetOutFile()->GetName());
   //  fRunInfo.WriteInfo(); // CRASHES due to file ownership i guess...
   //   cout << ">>> SlaveTerminate fRootManager->GetInChain()->Print()" << endl;
   //   fRootManager->GetInChain()->Print();
   //   cout << ">>>------------------------------------------------<<<" << endl;
   fRootManager->LastFill();
   fRootManager->Write();
-  fRootManager->CloseOutFile();
+  fRootManager->CloseSink();
 }
 //_____________________________________________________________________________
 
@@ -654,7 +646,7 @@ void FairRunAna::Reinit(UInt_t runId)
 void  FairRunAna::RunWithTimeStamps()
 {
   if (fIsInitialized) {
-    LOG(WARNING) << "RunWithTimeStamps has to be set before Run::Init !" << FairLogger::endl;
+    LOG(warn) << "RunWithTimeStamps has to be set before Run::Init !";
     exit(-1);
   } else {
     fTimeStamps=kTRUE;
@@ -668,9 +660,9 @@ void  FairRunAna::SetContainerStatic(Bool_t tempBool)
 {
   fStatic=tempBool;
   if ( fStatic ) {
-    LOG(INFO) << "Parameter Cont. initialisation is static" << FairLogger::endl;
+    LOG(info) << "Parameter Cont. initialisation is static";
   } else {
-    LOG(INFO) << "Parameter Cont. initialisation is NOT static" << FairLogger::endl;
+    LOG(info) << "Parameter Cont. initialisation is NOT static";
   }
 }
 
@@ -678,10 +670,10 @@ void  FairRunAna::SetContainerStatic(Bool_t tempBool)
 //_____________________________________________________________________________
 void FairRunAna::SetInputFile(TString name)
 {
-  LOG(WARNING) << "FairRunAna::SetInputFile is obsolete. Set it by FairFileSource" << FairLogger::endl;
+  LOG(warn) << "FairRunAna::SetInputFile is obsolete. Set it by FairFileSource";
   if ( fMixedSource )
     {
-      LOG(ERROR) << "Mixed input already set!" << FairLogger::endl;
+      LOG(error) << "Mixed input already set!";
       return;
     }
   if ( !fFileSource )
@@ -695,15 +687,15 @@ void FairRunAna::SetInputFile(TString name)
 //_____________________________________________________________________________
 void FairRunAna::AddFriend (TString name)
 {
-  LOG(WARNING) << "FairRunAna::AddFriend is obsolete. Set it by FairFileSource" << FairLogger::endl;
+  LOG(warn) << "FairRunAna::AddFriend is obsolete. Set it by FairFileSource";
   if ( fMixedSource )
     {
-      LOG(ERROR) << "Mixed input already set!" << FairLogger::endl;
+      LOG(error) << "Mixed input already set!";
       return;
     }
   if ( !fFileSource )
     {
-      LOG(ERROR) << "Input file not yet set!" << FairLogger::endl;
+      LOG(error) << "Input file not yet set!";
       return;
     }
   fFileSource->AddFriend(name);
@@ -711,15 +703,15 @@ void FairRunAna::AddFriend (TString name)
 //_____________________________________________________________________________
 void FairRunAna::AddFile(TString name)
 {
-  LOG(WARNING) << "FairRunAna::AddFile is obsolete. Set it by FairFileSource" << FairLogger::endl;
+  LOG(warn) << "FairRunAna::AddFile is obsolete. Set it by FairFileSource";
   if ( fMixedSource )
     {
-      LOG(ERROR) << "Mixed input already set!" << FairLogger::endl;
+      LOG(error) << "Mixed input already set!";
       return;
     }
   if ( !fFileSource )
     {
-      LOG(ERROR) << "Input file not yet set!" << FairLogger::endl;
+      LOG(error) << "Input file not yet set!";
       return;
     }
   fFileSource->AddFile(name);
@@ -731,13 +723,13 @@ void FairRunAna::AddFile(TString name)
 //_____________________________________________________________________________
 void FairRunAna::SetSignalFile(TString name, UInt_t identifier )
 {
-  LOG(WARNING) << "FairRunAna::SetSignalFile is obsolete. Set it by FairMixedSource" << FairLogger::endl;
+  LOG(warn) << "FairRunAna::SetSignalFile is obsolete. Set it by FairMixedSource";
   if (identifier==0) {
-    LOG(FATAL) << " ----- Identifier 0 is reserved for background files! please use other value ------ " << FairLogger::endl;
+    LOG(fatal) << " ----- Identifier 0 is reserved for background files! please use other value ------ ";
   }
   if ( fFileSource )
     {
-      LOG(ERROR) << "Standard input already set!" << FairLogger::endl;
+      LOG(error) << "Standard input already set!";
       return;
     }
   if ( !fMixedSource )
@@ -751,13 +743,13 @@ void FairRunAna::SetSignalFile(TString name, UInt_t identifier )
 //_____________________________________________________________________________
 void FairRunAna::AddSignalFile(TString name, UInt_t identifier )
 {
-  LOG(WARNING) << "FairRunAna::AddSignalFile is obsolete. Set it by FairMixedSource" << FairLogger::endl;
+  LOG(warn) << "FairRunAna::AddSignalFile is obsolete. Set it by FairMixedSource";
   if (identifier==0) {
-    LOG(FATAL) << " ----- Identifier 0 is reserved for background files! please use other value ------ " << FairLogger::endl;
+    LOG(fatal) << " ----- Identifier 0 is reserved for background files! please use other value ------ ";
   }
   if ( fFileSource )
     {
-      LOG(ERROR) << "Standard input already set!" << FairLogger::endl;
+      LOG(error) << "Standard input already set!";
       return;
     }
   if ( !fMixedSource )
@@ -771,10 +763,10 @@ void FairRunAna::AddSignalFile(TString name, UInt_t identifier )
 //_____________________________________________________________________________
 void FairRunAna::SetBackgroundFile(TString name)
 {
-  LOG(WARNING) << "FairRunAna::SetBackgroundFile is obsolete. Set it by FairMixedSource" << FairLogger::endl;
+  LOG(warn) << "FairRunAna::SetBackgroundFile is obsolete. Set it by FairMixedSource";
   if ( fFileSource )
     {
-      LOG(ERROR) << "Standard input already set!" << FairLogger::endl;
+      LOG(error) << "Standard input already set!";
       return;
     }
   if ( !fMixedSource )
@@ -788,15 +780,15 @@ void FairRunAna::SetBackgroundFile(TString name)
 //_____________________________________________________________________________
 void FairRunAna::AddBackgroundFile(TString name)
 {
-  LOG(WARNING) << "FairRunAna::AddBackgroundFile is obsolete. Set it by FairMixedSource" << FairLogger::endl;
+  LOG(warn) << "FairRunAna::AddBackgroundFile is obsolete. Set it by FairMixedSource";
   if ( fFileSource )
     {
-      LOG(ERROR) << "Standard input already set!" << FairLogger::endl;
+      LOG(error) << "Standard input already set!";
       return;
     }
   if ( !fMixedSource )
     {
-      LOG(ERROR) << "Background file not yet set!" << FairLogger::endl;
+      LOG(error) << "Background file not yet set!";
       return;
     }
   fMixedSource->AddBackgroundFile(name);
@@ -804,15 +796,15 @@ void FairRunAna::AddBackgroundFile(TString name)
 //_____________________________________________________________________________
 void  FairRunAna::BGWindowWidthNo(UInt_t background, UInt_t Signalid)
 {
-  LOG(WARNING) << "FairRunAna::BGWindowWidthNo is obsolete. Set it by FairMixedSource" << FairLogger::endl;
+  LOG(warn) << "FairRunAna::BGWindowWidthNo is obsolete. Set it by FairMixedSource";
   if ( fFileSource )
     {
-      LOG(ERROR) << "Standard input already set!" << FairLogger::endl;
+      LOG(error) << "Standard input already set!";
       return;
     }
   if ( !fMixedSource )
     {
-      LOG(ERROR) << "Background file not yet set!" << FairLogger::endl;
+      LOG(error) << "Background file not yet set!";
       return;
     }
   fMixedSource->BGWindowWidthNo(background, Signalid);
@@ -820,15 +812,15 @@ void  FairRunAna::BGWindowWidthNo(UInt_t background, UInt_t Signalid)
 //_____________________________________________________________________________
 void  FairRunAna::BGWindowWidthTime(Double_t background, UInt_t Signalid)
 {
-  LOG(WARNING) << "FairRunAna::BGWindowWidthTime is obsolete. Set it by FairMixedSource" << FairLogger::endl;
+  LOG(warn) << "FairRunAna::BGWindowWidthTime is obsolete. Set it by FairMixedSource";
   if ( fFileSource )
     {
-      LOG(ERROR) << "Standard input already set!" << FairLogger::endl;
+      LOG(error) << "Standard input already set!";
       return;
     }
   if ( !fMixedSource )
     {
-      LOG(ERROR) << "Background file not yet set!" << FairLogger::endl;
+      LOG(error) << "Background file not yet set!";
       return;
     }
   fMixedSource->BGWindowWidthTime(background, Signalid);
@@ -840,7 +832,7 @@ void  FairRunAna::BGWindowWidthTime(Double_t background, UInt_t Signalid)
 //_____________________________________________________________________________
 void FairRunAna::SetEventTimeInterval(Double_t min, Double_t max)
 {
-  LOG(WARNING) << "FairRunAna::SetEventTimeInterval is obsolete. Set it by FairSource" << FairLogger::endl;
+  LOG(warn) << "FairRunAna::SetEventTimeInterval is obsolete. Set it by FairSource";
   if ( fFileSource )
     {
       fFileSource->SetEventTimeInterval(min,max);
@@ -851,12 +843,12 @@ void FairRunAna::SetEventTimeInterval(Double_t min, Double_t max)
       fMixedSource->SetEventTimeInterval(min,max);
       return;
     }
-  LOG(ERROR) << "SetEventTimeInterval only by input source!" << FairLogger::endl;
+  LOG(error) << "SetEventTimeInterval only by input source!";
 }
 //_____________________________________________________________________________
 void  FairRunAna::SetEventMeanTime(Double_t mean)
 {
-  LOG(WARNING) << "FairRunAna::SetEventMeanTime is obsolete. Set it by FairSource" << FairLogger::endl;
+  LOG(warn) << "FairRunAna::SetEventMeanTime is obsolete. Set it by FairSource";
   if ( fFileSource )
     {
       fFileSource->SetEventMeanTime(mean);
@@ -867,12 +859,12 @@ void  FairRunAna::SetEventMeanTime(Double_t mean)
       fMixedSource->SetEventMeanTime(mean);
       return;
     }
-  LOG(ERROR) << "SetEventMeanTime only by input source!" << FairLogger::endl;
+  LOG(error) << "SetEventMeanTime only by input source!";
 }
 //_____________________________________________________________________________
 void FairRunAna::SetBeamTime(Double_t beamTime, Double_t gapTime)
 {
-  LOG(WARNING) << "FairRunAna::SetBeamTime is obsolete. Set it by FairSource" << FairLogger::endl;
+  LOG(warn) << "FairRunAna::SetBeamTime is obsolete. Set it by FairSource";
   if ( fFileSource )
     {
       fFileSource->SetBeamTime(beamTime, gapTime);
@@ -883,7 +875,7 @@ void FairRunAna::SetBeamTime(Double_t beamTime, Double_t gapTime)
       fMixedSource->SetBeamTime(beamTime, gapTime);
       return;
     }
-  LOG(ERROR) << "SetBeamTime only by input source!" << FairLogger::endl;
+  LOG(error) << "SetBeamTime only by input source!";
 }
 //_____________________________________________________________________________
 

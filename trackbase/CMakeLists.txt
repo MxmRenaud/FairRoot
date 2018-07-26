@@ -2,7 +2,7 @@
  #    Copyright (C) 2014 GSI Helmholtzzentrum fuer Schwerionenforschung GmbH    #
  #                                                                              #
  #              This software is distributed under the terms of the             # 
- #         GNU Lesser General Public Licence version 3 (LGPL) version 3,        #  
+ #              GNU Lesser General Public Licence (LGPL) version 3,             #  
  #                  copied verbatim in the file "LICENSE"                       #
  ################################################################################
 # Create a library called "libBase" which includes the source files given in
@@ -19,6 +19,7 @@ Set(INCLUDE_DIRECTORIES
   ${CMAKE_SOURCE_DIR}/base/field
   ${CMAKE_SOURCE_DIR}/base/sim
   ${CMAKE_SOURCE_DIR}/base/source
+  ${CMAKE_SOURCE_DIR}/base/sink
   ${CMAKE_SOURCE_DIR}/field 
   ${CMAKE_SOURCE_DIR}/passive
   ${CMAKE_SOURCE_DIR}/trackbase

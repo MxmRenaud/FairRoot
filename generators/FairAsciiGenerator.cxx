@@ -2,7 +2,7 @@
  *    Copyright (C) 2014 GSI Helmholtzzentrum fuer Schwerionenforschung GmbH    *
  *                                                                              *
  *              This software is distributed under the terms of the             * 
- *         GNU Lesser General Public Licence version 3 (LGPL) version 3,        *  
+ *              GNU Lesser General Public Licence (LGPL) version 3,             *  
  *                  copied verbatim in the file "LICENSE"                       *
  ********************************************************************************/
 // -------------------------------------------------------------------------
@@ -35,11 +35,10 @@ FairAsciiGenerator::FairAsciiGenerator(const char* fileName)
    fFileName(fileName)
 {
   //  fFileName  = fileName;
-  LOG(INFO) << "FairAsciiGenerator: Opening input file " 
-	    << fileName << FairLogger::endl;
+  LOG(info) << "FairAsciiGenerator: Opening input file " << fileName;
   fInputFile = new std::ifstream(fFileName);
   if ( ! fInputFile->is_open() ) {
-    LOG(FATAL) << "Cannot open input file." << FairLogger::endl;
+    LOG(fatal) << "Cannot open input file.";
   }
 
   // fPDG=TDatabasePDG::Instance();
@@ -63,8 +62,7 @@ Bool_t FairAsciiGenerator::ReadEvent(FairPrimaryGenerator* primGen)
 
   // Check for input file
   if ( ! fInputFile->is_open() ) {
-    LOG(ERROR) << "FairAsciiGenerator: Input file not open!" 
-	       << FairLogger::endl;
+    LOG(error) << "FairAsciiGenerator: Input file not open!";
     return kFALSE;
   }
 
@@ -79,20 +77,18 @@ Bool_t FairAsciiGenerator::ReadEvent(FairPrimaryGenerator* primGen)
 
   // Read event header line from input file
   *fInputFile >> ntracks;
-  if (fInputFile->fail() || ntracks < 0 || ntracks > (INT_MAX-1)) LOG(FATAL) << "Error reading the number of events from event header." << FairLogger::endl;
+  if (fInputFile->fail() || ntracks < 0 || ntracks > (INT_MAX-1)) LOG(fatal) << "Error reading the number of events from event header.";
   *fInputFile >> eventID >>  vx >>  vy >>  vz;
 
   // If end of input file is reached : close it and abort run
   if ( fInputFile->eof() ) {
-    LOG(INFO) << "FairAsciiGenerator: End of input file reached " 
-	      << FairLogger::endl;
+    LOG(info) << "FairAsciiGenerator: End of input file reached ";
     CloseInput();
     return kFALSE;
   }
 
-  LOG(INFO) << "FairAsciiGenerator: Event " << eventID << ",  vertex = ("
-	    << vx << "," << vy << "," << vz << ") cm,  multiplicity "
-	    << ntracks << FairLogger::endl;
+  LOG(info) << "FairAsciiGenerator: Event " << eventID << ",  vertex = ("
+            << vx << "," << vy << "," << vz << ") cm,  multiplicity " << ntracks;
 
   // Loop over tracks in the current event
   for (Int_t itrack=0; itrack<ntracks; itrack++) {
@@ -120,8 +116,7 @@ void FairAsciiGenerator::CloseInput()
 {
   if ( fInputFile ) {
     if ( fInputFile->is_open() ) {
-      LOG(INFO) << "FairAsciiGenerator: Closing input file "
-		<< fFileName << FairLogger::endl;
+      LOG(info) << "FairAsciiGenerator: Closing input file " << fFileName;
       fInputFile->close();
     }
     delete fInputFile;

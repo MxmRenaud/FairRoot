@@ -2,7 +2,7 @@
  *    Copyright (C) 2014 GSI Helmholtzzentrum fuer Schwerionenforschung GmbH    *
  *                                                                              *
  *              This software is distributed under the terms of the             * 
- *         GNU Lesser General Public Licence version 3 (LGPL) version 3,        *  
+ *              GNU Lesser General Public Licence (LGPL) version 3,             *  
  *                  copied verbatim in the file "LICENSE"                       *
  ********************************************************************************/
 #ifdef __CINT__
@@ -23,6 +23,8 @@
 #pragma link C++ class  FairHitPointSetDraw;
 #pragma link C++ class  FairMCPointDraw;
 #pragma link C++ class  FairTimeStampPointDraw;
+#pragma link C++ class FairXMLNode;
+#pragma link C++ class FairXMLAttrib;
 
 
 

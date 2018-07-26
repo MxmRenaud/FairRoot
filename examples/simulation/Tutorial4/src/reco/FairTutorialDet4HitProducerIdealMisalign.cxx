@@ -2,7 +2,7 @@
  *    Copyright (C) 2014 GSI Helmholtzzentrum fuer Schwerionenforschung GmbH    *
  *                                                                              *
  *              This software is distributed under the terms of the             * 
- *         GNU Lesser General Public Licence version 3 (LGPL) version 3,        *  
+ *              GNU Lesser General Public Licence (LGPL) version 3,             *  
  *                  copied verbatim in the file "LICENSE"                       *
  ********************************************************************************/
 // -------------------------------------------------------------------------
@@ -54,7 +54,7 @@ FairTutorialDet4HitProducerIdealMisalign::~FairTutorialDet4HitProducerIdealMisal
 void FairTutorialDet4HitProducerIdealMisalign::SetParContainers()
 {
 
-  LOG(INFO)<< "Set tutdet missallign parameters"<<FairLogger::endl;
+  LOG(info)<< "Set tutdet missallign parameters";
   // Get Base Container
   FairRunAna* ana = FairRunAna::Instance();
   FairRuntimeDb* rtdb=ana->GetRuntimeDb();
@@ -94,14 +94,14 @@ InitStatus FairTutorialDet4HitProducerIdealMisalign::Init()
   // Get RootManager
   FairRootManager* ioman = FairRootManager::Instance();
   if ( ! ioman ) {
-    LOG(FATAL) << "RootManager not instantised!" << FairLogger::endl;
+    LOG(fatal) << "RootManager not instantised!";
     return kFATAL;
   }
 
   // Get input array
   fPointArray = static_cast<TClonesArray*>(ioman->GetObject("TutorialDetPoint"));
   if ( ! fPointArray ) {
-    LOG(FATAL)<<"No TutorialDetPoint array!" << FairLogger::endl;
+    LOG(fatal)<<"No TutorialDetPoint array!";
     return kFATAL;
   }
 
@@ -109,8 +109,7 @@ InitStatus FairTutorialDet4HitProducerIdealMisalign::Init()
   fHitArray = new TClonesArray("FairTutorialDet4Hit");
   ioman->Register("TutorialDetHit", "TutorialDet", fHitArray, kTRUE);
 
-  LOG(INFO)<< "HitProducerIdealMissallign: Initialisation successfull"
-           << FairLogger::endl;
+  LOG(info)<< "HitProducerIdealMissallign: Initialisation successfull";
 
 
   fShiftX=fDigiPar->GetShiftX();
@@ -122,15 +121,14 @@ InitStatus FairTutorialDet4HitProducerIdealMisalign::Init()
 
   Bool_t isGlobalCoordinateSystem=fGeoPar->IsGlobalCoordinateSystem();
   if (isGlobalCoordinateSystem) {
-    LOG(FATAL) << "Task can only work with local coordinates."
-	       << FairLogger::endl;
+    LOG(fatal) << "Task can only work with local coordinates.";
   }
   /*
     Int_t num = fDigiPar->GetNrOfDetectors();
     Int_t size = fShiftX.GetSize();
-    LOG(INFO)<<"Array has a size of "<< size << "elements"<<FairLogger::endl;
+    LOG(info)<<"Array has a size of "<< size << "elements";
     for (Int_t i=0; i< num; ++i) {
-      LOG(INFO)<< i <<": "<<fShiftX.At(i)<<FairLogger::endl;
+      LOG(info)<< i <<": "<<fShiftX.At(i);
     }
   */
   return kSUCCESS;
@@ -174,16 +172,16 @@ void FairTutorialDet4HitProducerIdealMisalign::Exec(Option_t* /*opt*/)
       y  = (-point->GetX()*sinAlpha + point->GetY()*cosAlpha)-fShiftY.At(detID);
       z  = point->GetZ();
 
-      LOG(DEBUG)<<"Pos before misalignment: "<< point->GetX() <<", "
-                << point->GetY() <<", "<< point->GetZ() <<FairLogger::endl;
-      LOG(DEBUG)<<"Pos after misalignment: "<< x <<", "
-                << y <<", "<< z <<FairLogger::endl;
+      LOG(debug)<<"Pos before misalignment: "<< point->GetX() <<", "
+                << point->GetY() <<", "<< point->GetZ();
+      LOG(debug)<<"Pos after misalignment: "<< x <<", "
+                << y <<", "<< z;
 
       x = x + GetHitErr(0.1);
       y = y + GetHitErr(0.1);
 
-      LOG(DEBUG2)<<"Missallign hit by "<<fShiftX.At(detID)<<" cm in x- and "
-                 << fShiftY.At(detID)<<" cm in y-direction."<<FairLogger::endl;
+      LOG(debug2)<<"Missallign hit by "<<fShiftX.At(detID)<<" cm in x- and "
+                 << fShiftY.At(detID)<<" cm in y-direction.";
 
       // Time of flight
 //      tof = point->GetTime();
@@ -200,7 +198,7 @@ void FairTutorialDet4HitProducerIdealMisalign::Exec(Option_t* /*opt*/)
       y  = point->GetY();
       z  = point->GetZ();
 
-      LOG(INFO)<<"Position: "<<x<<", "<<y<<", "<<z<<FairLogger::endl;
+      LOG(info)<<"Position: "<<x<<", "<<y<<", "<<z;
 
       Double_t local[3] = {x, y, z};
       Double_t global[3];
@@ -211,8 +209,8 @@ void FairTutorialDet4HitProducerIdealMisalign::Exec(Option_t* /*opt*/)
       y = global[1] + GetHitErr(0.1);
       z = global[2];
 
-      LOG(INFO)<<"Position: "<<x<<", "<<y<<", "<<z<<FairLogger::endl;
-      LOG(INFO)<<"****"<<FairLogger::endl;
+      LOG(info)<<"Position: "<<x<<", "<<y<<", "<<z;
+      LOG(info)<<"****";
       // Time of flight
       //tof = point->GetTime();
 
@@ -225,8 +223,8 @@ void FairTutorialDet4HitProducerIdealMisalign::Exec(Option_t* /*opt*/)
     }
   }
   // Event summary
-  LOG(DEBUG)<< "Create " << nHits << " TutorialDetHits out of "
-            << nPoints << " TutorilaDetPoints created." << FairLogger::endl;
+  LOG(debug)<< "Create " << nHits << " TutorialDetHits out of "
+            << nPoints << " TutorilaDetPoints created.";
 
 }
 // -------------------------------------------------------------------------

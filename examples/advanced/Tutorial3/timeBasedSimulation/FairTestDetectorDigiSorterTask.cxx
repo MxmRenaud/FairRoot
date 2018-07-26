@@ -2,7 +2,7 @@
  *    Copyright (C) 2014 GSI Helmholtzzentrum fuer Schwerionenforschung GmbH    *
  *                                                                              *
  *              This software is distributed under the terms of the             * 
- *         GNU Lesser General Public Licence version 3 (LGPL) version 3,        *  
+ *              GNU Lesser General Public Licence (LGPL) version 3,             *  
  *                  copied verbatim in the file "LICENSE"                       *
  ********************************************************************************/
 /*
@@ -43,9 +43,8 @@ void FairTestDetectorDigiSorterTask::AddNewDataToTClonesArray(FairTimeStamp* dat
     TClonesArray* myArray = ioman->GetTClonesArray(fOutputBranch);
     if (fVerbose > 1)
     {
-        LOG(INFO) << "AddNewDataToTClonesArray Data: "
-		  << FairLogger::endl;
-        LOG(INFO) << static_cast<FairTestDetectorDigi*>(data)->ToString();
+        LOG(info) << "AddNewDataToTClonesArray Data: ";
+        LOG(info) << static_cast<FairTestDetectorDigi*>(data)->ToString();
     }
     new ((*myArray)[myArray->GetEntries()]) FairTestDetectorDigi(*static_cast<FairTestDetectorDigi*>(data));
 }

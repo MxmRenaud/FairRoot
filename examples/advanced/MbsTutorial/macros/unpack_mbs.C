@@ -9,7 +9,7 @@ void unpack_mbs()
     TString tutdir = dir + "/advanced/MbsTutorial";
 
     FairLmdSource* source = new FairLmdSource();
-    source->AddFile(tutdir + "/data/sample_data_2.lmd");
+    source->AddFile("../data/sample_data_2.lmd");
 
     // NeuLAND MBS parameters -------------------------------
     Short_t type = 94;
@@ -23,7 +23,7 @@ void unpack_mbs()
 
     // Create online run ---------------------------------------------------------
     FairRunOnline* run = new FairRunOnline(source);
-    run->SetOutputFile("output.root");
+    run->SetSink(new FairRootFileSink("output.root"));
     run->ActivateHttpServer();
     run->SetAutoFinish(kFALSE);
     // ---------------------------------------------------------------------------
@@ -62,4 +62,3 @@ void unpack_mbs()
         cout << "Real time " << rtime << " s, CPU time " << ctime << "s" << endl << endl;
     }
 }
-

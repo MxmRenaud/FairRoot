@@ -2,7 +2,7 @@
  *    Copyright (C) 2014 GSI Helmholtzzentrum fuer Schwerionenforschung GmbH    *
  *                                                                              *
  *              This software is distributed under the terms of the             * 
- *         GNU Lesser General Public Licence version 3 (LGPL) version 3,        *  
+ *              GNU Lesser General Public Licence (LGPL) version 3,             *  
  *                  copied verbatim in the file "LICENSE"                       *
  ********************************************************************************/
 //////////////////////////////////////////////////////////////////////
@@ -30,6 +30,7 @@
 #include "TSocket.h"                    // for TSocket, etc
 
 #include <iostream>                     // for operator<<, basic_ostream, etc
+#include <sstream>                     // for stringstream
 
 #include <signal.h>                     // IWYU pragma: keep
 #include <unistd.h>                     // IWYU pragma: keep
@@ -117,73 +118,69 @@ MRevBuffer::MRevBuffer(Int_t iMode)
 //  iDebug = iMode;
   iOutMode = iMode;
   if (iDebug == 1) {
-    LOG(DEBUG) <<  "-I- client runs in debug mode (1)" << FairLogger::endl;
+    LOG(debug) <<  "-I- client runs in debug mode (1)";
   } else if (iDebug == 2)
-    LOG(DEBUG) <<  "-I- client shows buffer numbers and select/receive (mode 2)"
-         << FairLogger::endl;
+    LOG(debug) <<  "-I- client shows buffer numbers and select/receive (mode 2)";
   else if (iDebug == 3) {
-    LOG(DEBUG) <<  "-I- client shows buffer numbers (mode 3)" << FairLogger::endl;
+    LOG(debug) <<  "-I- client shows buffer numbers (mode 3)";
   } else if (iDebug == 5) {
-    LOG(DEBUG) <<  "-I- client shows event parameters (mode 5)" << FairLogger::endl;
+    LOG(debug) <<  "-I- client shows event parameters (mode 5)";
   }
 
   if (iDebug == 1) {
-    LOG(DEBUG) <<  "    check ENDIAN, ";
+    LOG(debug) <<  "    check ENDIAN, ";
 #ifdef _AIX
-    LOG(DEBUG) <<  " should be BIG_ENDIAN: ";
+    LOG(debug) <<  " should be BIG_ENDIAN: ";
 #endif
 #ifdef Linux
-    LOG(DEBUG) <<  " should be LITTLE_ENDIAN: ";
+    LOG(debug) <<  " should be LITTLE_ENDIAN: ";
 #endif
 
 #ifdef BIG__ENDIAN
-    LOG(DEBUG) <<  " BIG_ENDIAN" << FairLogger::endl;
+    LOG(debug) <<  " BIG_ENDIAN";
 #else
-    LOG(DEBUG) <<  " LITTLE_ENDIAN" << FairLogger::endl;
+    LOG(debug) <<  " LITTLE_ENDIAN";
 #endif
   }
 
   //  iBufSizeAlloc = 16384;
   //  piBuf = new int [iBufSizeAlloc/sizeof(int)+1]; // 16k buffer + len
   if (iDebug == 1)
-    LOG(DEBUG) <<  "-D- buffer allocated (" << iBufSizeAlloc+sizeof(int)
-         << " byte)" << FairLogger::endl;
+    LOG(debug) <<  "-D- buffer allocated (" << iBufSizeAlloc+sizeof(int)
+         << " byte)";
 
   //  REvent* pev = new REvent();    // create event (once)
   //  pEvt = pev;                    // keep pointer in class MRevBuffer
 
-  // LOG(INFO) <<  "    MRevBuffer() executed" << FairLogger::endl;
+  // LOG(info) <<  "    MRevBuffer() executed";
 
 }  // constructor
 
 MRevBuffer::~MRevBuffer()
 {
-  // LOG(INFO) <<  "    ~MRevBuffer() ..." << FairLogger::endl;
+  // LOG(info) <<  "    ~MRevBuffer() ...";
   delete [] piBuf;
   piNextEvt = 0;
   pEvt->~REvent();
-  // LOG(INFO) <<  "    ~MRevBuffer() executed" << FairLogger::endl;
+  // LOG(info) <<  "    ~MRevBuffer() executed";
 
 } // destructor
 
 TSocket* MRevBuffer::RevOpen ( char* pNode, Int_t iPort, Int_t iEvent)
 {
   if (iEvent < 0) {
-    LOG(INFO) <<  "-E- number of requested events (" << iEvent
-         << ") invalid" << FairLogger::endl;
+    LOG(info) <<  "-E- number of requested events (" << iEvent
+         << ") invalid";
     return(0);
   }
   if (iEvent == 0) {
     iEvent = 2000000000;           // nearly unlimited
-    LOG(INFO) <<  "-I- unlimited no. of MBS events requested - break with 'CTL C'"
-         << FairLogger::endl;
+    LOG(info) <<  "-I- unlimited no. of MBS events requested - break with 'CTL C'";
   }
 
   if (iPort == 6001) {
-    LOG(INFO) <<  "-E- old event server (port no. 6001) running on DAQ frontend not yet supported"
-         << FairLogger::endl;
-    LOG(INFO) <<  "    use stream server (port no. 6002) and remote event server (port no. 6003)"
-         << FairLogger::endl;
+    LOG(info) <<  "-E- old event server (port no. 6001) running on DAQ frontend not yet supported";
+    LOG(info) <<  "    use stream server (port no. 6002) and remote event server (port no. 6003)";
     return(0);
   }
   if (iPort == 0) { iPort = 6003; } // default MBS remote event server
@@ -200,26 +197,26 @@ TSocket* MRevBuffer::RevOpen ( char* pNode, Int_t iPort, Int_t iEvent)
 
   if (!iSocket) {
     iEvtNo = -1;            // initialization (info buffer) required
-    LOG(INFO) <<  "-I- open connection to server " << pNode
-         << ":" << iPort << FairLogger::endl;
+    LOG(info) <<  "-I- open connection to server " << pNode
+         << ":" << iPort;
 
     pTSocket = new TSocket(pNode, iPort);
     if ( !pTSocket->IsValid() ) {
-      LOG(INFO) <<  "-E- open connection to server " << pNode
-           << " failed" << FairLogger::endl;
+      LOG(info) <<  "-E- open connection to server " << pNode
+           << " failed";
       return(0);
     }
-    LOG(INFO) <<  "    connection to server " << pNode
-         << ":" << iPort << " okay" << FairLogger::endl;
+    LOG(info) <<  "    connection to server " << pNode
+         << ":" << iPort << " okay";
 
     iSocket = pTSocket->GetDescriptor();
     imySig = iSocket;
     if (iDebug == 1) {
-      LOG(DEBUG) <<  "    socket " << iSocket << FairLogger::endl;
+      LOG(debug) <<  "    socket " << iSocket;
     }
 
   } else if (iDebug == 1) {
-    LOG(DEBUG) <<  "-D- socket " << iSocket << FairLogger::endl;
+    LOG(debug) <<  "-D- socket " << iSocket;
   }
 
   iStatus = 2;                                   // server connected
@@ -292,30 +289,29 @@ REvent* MRevBuffer::RevGet(TSocket* pSocket, Int_t iFlush, Int_t)
   // initialize communication with server
   if (iEvtNo == -1) {        // initialize communication with server
     if (iDebug == 1)
-      LOG(DEBUG) <<  "-D- commbuf (data size " << ntohl(sComm.iSize)
+      LOG(debug) <<  "-D- commbuf (data size " << ntohl(sComm.iSize)
            << " byte): mode(1) " << ntohl(sComm.iMode)
            << ", request " <<  ntohl(sComm.iBufRequ)
-           << " event buffer(s)" << FairLogger::endl;
+           << " event buffer(s)";
 
     // request event buffer from server
     ilen = pSocket->SendRaw(piComm, iCommSize, kDefault);
     if (ilen < 0) {
-      LOG(INFO) <<  "-E- sending request for events to server, rc = "
-           << ilen << FairLogger::endl;
+      LOG(info) <<  "-E- sending request for events to server, rc = "
+           << ilen;
       iError = 1;
       goto gEndGet;
     }
 
     if (iDebug == 1)
-      LOG(DEBUG) <<  "    communication buffer sent (request info buffer) "
-           << FairLogger::endl;
+      LOG(debug) <<  "    communication buffer sent (request info buffer) ";
 
     // receive info buffer from server
     piInfo = &(sInfo.iSize);
     ilen = pSocket->RecvRaw(piInfo, iInfoSize, kDefault);
     if (ilen < 0) {
-      LOG(INFO) <<  "-E- receiving info buffer from server, rc = "
-           << ilen << FairLogger::endl;
+      LOG(info) <<  "-E- receiving info buffer from server, rc = "
+           << ilen;
       iError = 1;
       goto gEndGet;
     }
@@ -323,21 +319,21 @@ REvent* MRevBuffer::RevGet(TSocket* pSocket, Int_t iFlush, Int_t)
     iHeadPar = ntohl(sInfo.iHeadPar);
     iTimeOut = ntohl(sInfo.iTimeOut);
     if (iDebug == 1) {
-      LOG(DEBUG) <<  "-D- info buffer received:" << FairLogger::endl;
-      LOG(DEBUG) <<  "    size data " << ntohl(sInfo.iSize)
+      LOG(debug) <<  "-D- info buffer received:";
+      LOG(debug) <<  "    size data " << ntohl(sInfo.iSize)
            << ", mode (1) " << ntohl(sInfo.iMode)
            << ", header parms " << iHeadPar
-           << ", timeout " << iTimeOut << FairLogger::endl;
+           << ", timeout " << iTimeOut;
     }
 
     if ( (ntohl(sInfo.iMode) != 1) ||
          ( static_cast<int>(ntohl(sInfo.iSize)) != iInfoSize-iint) ) {
-      LOG(INFO) <<  "-E- invalid info buffer received: " << FairLogger::endl;
-      LOG(INFO) <<  "    size data ( " << iInfoSize-iint
+      LOG(info) <<  "-E- invalid info buffer received: ";
+      LOG(info) <<  "    size data ( " << iInfoSize-iint
            << ") "  << ntohl(sInfo.iSize)
            << ", mode (1) " << ntohl(sInfo.iMode)
            << ", header parms " << iHeadPar
-           << ", timeout " << iTimeOut << FairLogger::endl;
+           << ", timeout " << iTimeOut;
       iError = 1;
       goto gEndGet;
     }
@@ -350,7 +346,7 @@ REvent* MRevBuffer::RevGet(TSocket* pSocket, Int_t iFlush, Int_t)
     if (iFlush) {
       inew = 1;                            // request new buffer
       if (iDebug == 1) {
-        LOG(DEBUG) <<  "-D- skip current buffer" << FairLogger::endl;
+        LOG(debug) <<  "-D- skip current buffer";
       }
     } else {
       if (iEvtNo >= 0) {
@@ -364,16 +360,15 @@ REvent* MRevBuffer::RevGet(TSocket* pSocket, Int_t iFlush, Int_t)
 
         if (iEvtRel+ii >= iEvtBuf) {
           if (iDebug == 1) {
-            LOG(DEBUG) <<  "-D- request new buffer" << FairLogger::endl;
+            LOG(debug) <<  "-D- request new buffer";
           }
           inew = 1;
           if (iDebug == -1) {
             piNextEvt += iEvtPar;         // skip previous event
-            LOG(DEBUG) <<  "-D- next 40 2byte-words of buffer:" << FairLogger::endl;
+            LOG(debug) <<  "-D- next 40 2byte-words of buffer:";
             psNextEvt = reinterpret_cast<short*>(piNextEvt);
             for (Int_t iii=0; iii<40; iii++) {
-              LOG(DEBUG) <<  "    " << iii+1 << ": " << psNextEvt[iii]
-                   << FairLogger::endl;
+              LOG(debug) <<  "    " << iii+1 << ": " << psNextEvt[iii];
             }
           }
         } else { inew = 0; }
@@ -394,8 +389,8 @@ REvent* MRevBuffer::RevGet(TSocket* pSocket, Int_t iFlush, Int_t)
     // request next buffer or finish
     ilen = pSocket->SendRaw(piComm, iCommSize, kDefault);
     if (ilen < 0) {
-      LOG(INFO) <<  "-E- sending request for buffer " << iBufNo+1
-           << " to server, rc = " << ilen << FairLogger::endl;
+      LOG(info) <<  "-E- sending request for buffer " << iBufNo+1
+           << " to server, rc = " << ilen;
       iError = 1;
       goto gEndGet;
     }
@@ -403,8 +398,7 @@ REvent* MRevBuffer::RevGet(TSocket* pSocket, Int_t iFlush, Int_t)
     if (imySig == -1) { goto gEndGet; }
 
     if (iDebug == 1)
-      LOG(DEBUG) <<  "-D- communication buffer sent (request next buffer) "
-           << FairLogger::endl;
+      LOG(debug) <<  "-D- communication buffer sent (request next buffer) ";
 
 gRetryLen:
     // get size of data following
@@ -413,7 +407,7 @@ gRetryLen:
     pcBuf = reinterpret_cast<char*>(piBuf);
     while(iSize > 0) {
       if ( (imySig == -1) && (iDebug) ) {
-        LOG(DEBUG) <<  "    CTL C detected (before recv len)" << FairLogger::endl;
+        LOG(debug) <<  "    CTL C detected (before recv len)";
       }
 gNextRecvL:
       iRC = recv(iSocket, pcBuf, iSize, 0);
@@ -423,14 +417,14 @@ gNextRecvL:
             sprintf(cMsg,
                     "\n-E- receiving data length from server");
             perror(cMsg);
-            LOG(DEBUG) <<  "    CTL C detected (during recv len)"
-                 << FairLogger::endl;
+            LOG(debug) <<  "    CTL C detected (during recv len)"
+;
           }
           goto gNextRecvL;
         } else {                                 // a real problem
           sprintf(cMsg, "\n-E- receiving data length from server");
           perror(cMsg);
-          if (iDebug) { LOG(DEBUG) <<  "    retry" << FairLogger::endl; }
+          if (iDebug) { LOG(debug) <<  "    retry"; }
 
           iRetryRecv++;      // count no. of retries to limit them
           if (iRetryRecv > iRetryRecvLim) { // avoid infinite loop
@@ -441,10 +435,10 @@ gNextRecvL:
       }
       if ( iRC == 0 ) {
         if ( (iDebug == 2) || (iDebug == 3) ) {
-          LOG(DEBUG) <<  FairLogger::endl;
+          LOG(debug) <<  std::endl;
         }
-        LOG(INFO) <<  "-E- receiving data length: connection closed by server"
-             << FairLogger::endl;
+        LOG(info) <<  "-E- receiving data length: connection closed by server"
+;
         iError = 1;
         goto gEndGet;
       }
@@ -461,48 +455,48 @@ gNextRecvL:
     }
 
     if ( (imySig == -1) && (iDebug) ) {
-      LOG(DEBUG) <<  "    CTL C detected (after recv len)" << FairLogger::endl;
+      LOG(debug) <<  "    CTL C detected (after recv len)";
     }
 
     iBufSize = ntohl(piBuf[0]);
     if (iDebug == 1) {
-      LOG(DEBUG) <<  "    data size received: " << iBufSize << FairLogger::endl;
+      LOG(debug) <<  "    data size received: " << iBufSize;
     }
 
     if (iBufSize <= 0) {
       if (iBufSize == 0) {
         if (iDebug) {
-          LOG(DEBUG) <<  FairLogger::endl;
+          LOG(debug) <<  std::endl;
         }
-        LOG(INFO) <<  "-W- server closed connection" << FairLogger::endl;
-        LOG(INFO) <<  "    " << iEvtNo << " of " << iEvtMax
-             << " events received" << FairLogger::endl;
+        LOG(info) <<  "-W- server closed connection";
+        LOG(info) <<  "    " << iEvtNo << " of " << iEvtMax
+             << " events received";
         iError = 1;
         goto gEndGet;
       }
 
       if (iBufSize == -1) {
         if (iRetryFirst) {
-          LOG(INFO) <<  FairLogger::endl << "-E- no data length received: ";
+          LOG(info) <<  std::endl << "-E- no data length received: ";
           iRetryFirst = 0;
         }
         iRetry++;
         if (iRetry > iRetryMax) {
-          LOG(INFO) <<  iRetryMax << "times" << FairLogger::endl;
+          LOG(info) <<  iRetryMax << "times";
           iError = 1;
           goto gEndGet;
         }
         goto gRetryLen;
       } else {
-        LOG(INFO) <<  FairLogger::endl << "-E- invalid data length received: "
-             << iBufSize << FairLogger::endl;
+        LOG(info) <<  std::endl << "-E- invalid data length received: "
+             << iBufSize;
         iError = 1;
       }
 
       goto gEndGet;
     }
     if (iRetry) {
-      LOG(INFO) <<  iRetry << "times" << FairLogger::endl;
+      LOG(info) <<  iRetry << "times";
     }
 
     // increase data buffer, if necessary
@@ -514,8 +508,8 @@ gNextRecvL:
       piBuf[0] = iBufSize;
       // keep sent buffer size (without length field)
       if (iDebug == 1)
-        LOG(DEBUG) <<  "-I- total buffer increased to "
-             << iBufSizeAlloc << " byte" << FairLogger::endl;
+        LOG(debug) <<  "-I- total buffer increased to "
+             << iBufSizeAlloc << " byte";
     }
 
     // get event buffer without length field
@@ -524,7 +518,7 @@ gNextRecvL:
     pcBuf = reinterpret_cast<char*>(&(piBuf[1]));
     while(iSize > 0) {
       if ( (imySig == -1) && (iDebug) ) {
-        LOG(DEBUG) <<  "    CTL C detected (before recv data)" << FairLogger::endl;
+        LOG(debug) <<  "    CTL C detected (before recv data)";
       }
 gNextRecvD:
       iRC = recv(iSocket, pcBuf, iSize, 0);
@@ -533,8 +527,7 @@ gNextRecvD:
           if (iDebug) {
             sprintf(cMsg, "\n-E- receiving data from server");
             perror(cMsg);
-            LOG(DEBUG) <<  "    CTL C detected (during recv data)"
-                 << FairLogger::endl;
+            LOG(debug) <<  "    CTL C detected (during recv data)";
           }
           goto gNextRecvD;
         } else {                                 // a real problem
@@ -550,10 +543,10 @@ gNextRecvD:
       }
       if ( iRC == 0 ) {
         if ( (iDebug == 2) || (iDebug == 3) ) {
-          LOG(DEBUG) <<  FairLogger::endl;
+          LOG(debug) <<  std::endl;
         }
-        LOG(INFO) <<  "-E- receiving data: connection closed by server"
-             << FairLogger::endl;
+        LOG(info) <<  "-E- receiving data: connection closed by server"
+;
         iError = 1;
         goto gEndGet;
       }
@@ -571,7 +564,7 @@ gNextRecvD:
 
     if (imySig == -1) {
       if (iDebug) {
-        LOG(DEBUG) <<  "    CTL C detected (after recv data)" << FairLogger::endl;
+        LOG(debug) <<  "    CTL C detected (after recv data)";
       }
       goto gEndGet;
     }
@@ -584,15 +577,15 @@ gNextRecvD:
         if (iDebug == 1)
           printf("    dummy buffer no. %d, %d events\n",
                  iBufNoServ, iEvtBuf);
-        if (iDebug == 3) { LOG(INFO) <<  FairLogger::endl; }
-        LOG(DEBUG) <<  "*** connection to remote event server okay, but currently no DAQ events ("
-             << iBufNoServ << ")" << FairLogger::endl;
+        if (iDebug == 3) { LOG(info) <<  std::endl; }
+        LOG(debug) <<  "*** connection to remote event server okay, but currently no DAQ events ("
+             << iBufNoServ << ")";
         iStatus = 3;
         goto gRetryLen;
       } else {
-        LOG(INFO) <<  "-E- invalid event number in dummy buffer no. "
+        LOG(info) <<  "-E- invalid event number in dummy buffer no. "
              << iBufNoServ << ": "
-             << iEvtBuf << " (expected: 0)" << FairLogger::endl;
+             << iEvtBuf << " (expected: 0)";
         iError = 1;
         goto gEndGet;
       }
@@ -609,7 +602,7 @@ gNextRecvD:
 //      lRC  = swaplw( &piBuf[1], iBufSize/iint, 0);
       swaplw( &piBuf[1], iBufSize/iint, 0);
       if ( (iBufNo == 0) && (iDebug) ) {
-        LOG(DEBUG) <<  "    Event data swapped" << FairLogger::endl;
+        LOG(debug) <<  "    Event data swapped";
       }
     }
 
@@ -634,18 +627,18 @@ gNextRecvD:
 
     pFrag = reinterpret_cast<sMbsBufFrag*>(&piBuf[3]);
     if (iDebug == 1) {
-      LOG(DEBUG) <<  FairLogger::endl << "buffer " << iBufNo
+      LOG(debug) <<  std::endl << "buffer " << iBufNo
            << " (" << iBufNoServ << "): "
            << " size "
-           << iBufSize << " byte" << FairLogger::endl;
+           << iBufSize << " byte";
       if (pFrag->cBuf_fragBegin) {
-        LOG(DEBUG) <<  "    last event fragment" << FairLogger::endl;
+        LOG(debug) <<  "    last event fragment";
       }
       if (pFrag->cBuf_fragEnd) {
-        LOG(DEBUG) <<  "    first event fragment" << FairLogger::endl;
+        LOG(debug) <<  "    first event fragment";
       }
-      LOG(DEBUG) <<  "    buffer contains " << iEvtBuf << " elements"
-           << FairLogger::endl;
+      LOG(debug) <<  "    buffer contains " << iEvtBuf << " elements"
+;
     }
 
     if (pFrag->cBuf_fragEnd) {
@@ -661,10 +654,10 @@ gNextRecvD:
     }
 
     if (iDebug == -1) {
-      LOG(DEBUG) <<  "-D- first 50 2byte-words of buffer:" << FairLogger::endl;
+      LOG(debug) <<  "-D- first 50 2byte-words of buffer:";
       psNextEvt = reinterpret_cast<short*>(&piBuf[1]);
       for (Int_t iii=0; iii<50; iii++) {
-        LOG(DEBUG) <<  "    " << iii+1 << ": " << psNextEvt[iii] << FairLogger::endl;
+        LOG(debug) <<  "    " << iii+1 << ": " << psNextEvt[iii];
       }
     }
 
@@ -730,12 +723,13 @@ gNextRecvD:
     pEvt->pSubEvt[0] = reinterpret_cast<Int_t*>(&pshort[6]);
 
 /*
-    LOG(DEBUG) <<  "    evt " << iEvtNo << " (" << piNextEvt[3]
+    std::stringstream ss
+    ss <<  "    evt " << iEvtNo << " (" << piNextEvt[3]
          << "), len " << pEvtHead->iMbsEv101_dlen
          << ", type " << pEvtHead->sMbsEv101_type
          << "." << pEvtHead->sMbsEv101_subtype
          << ", trigger " << pEvtHead->sMbsEv101_trigger;
-    LOG(DEBUG) <<  ", SE1 len " << iselen1
+    ss <<  ", SE1 len " << iselen1
          << " procid " << pSEvtHead->sMbsSev101_procid;
 */
     ielen -= (iselen1 + 8);
@@ -748,7 +742,7 @@ gNextRecvD:
       pshort += iselen + 4;
       pSEvtHead = reinterpret_cast<sMbsSev101*>(pshort);
       iselen = pSEvtHead->iMbsSev101_dlen;
-//      LOG(DEBUG) <<  ", SE" << ii << " " << iselen
+//      ss <<  ", SE" << ii << " " << iselen
 //           << " " << pSEvtHead->sMbsSev101_procid;
       ielen -= (iselen + 4);
 
@@ -765,7 +759,7 @@ gNextRecvD:
 
 
     }
-//    LOG(DEBUG) <<  FairLogger::endl;
+//    LOG(debug) << ss.str();
   }
 
   // fill event header
@@ -777,21 +771,21 @@ gNextRecvD:
   pEvt->ReFillData(piNextEvt);
 
   if (imySig == -1) {
-    LOG(INFO) <<  FairLogger::endl << "-D- CTL C specified";
-    if (iDebug) { LOG(DEBUG) <<  " (at end RevGet)" << FairLogger::endl; }
-    else { LOG(INFO) <<  FairLogger::endl; }
+    LOG(info) <<  std::endl << "-D- CTL C specified";
+    if (iDebug) { LOG(debug) <<  " (at end RevGet)"; }
+    else { LOG(info) << std::endl; }
     goto gEndGet;
   }
 
   if (iEvtNo == iEvtMax) {
-    LOG(INFO) <<  FairLogger::endl << "-I- all required events ("
+    LOG(info) <<  std::endl << "-I- all required events ("
          << iEvtMax << ") received: " << iBufNo << " buffers ("
-         << iBufNo1 << " - " << iBufNo2 << ")" << FairLogger::endl;
-    LOG(INFO) <<  "    fragments found: " << iFragBeginIgn << " begin, "
-         << iFragEndIgn << " end" << FairLogger::endl;
+         << iBufNo1 << " - " << iBufNo2 << ")";
+    LOG(info) <<  "    fragments found: " << iFragBeginIgn << " begin, "
+         << iFragEndIgn << " end";
     if (iFragConc)
-      LOG(INFO) <<  "    " << iFragConc
-           << " events not concatenated from fragments" << FairLogger::endl;
+      LOG(info) <<  "    " << iFragConc
+           << " events not concatenated from fragments";
   }
 
   iStatus = 0;                      // last event request successfull
@@ -800,18 +794,18 @@ gNextRecvD:
 gEndGet:
   if ( (iError) || (imySig == -1) ) {
     if (iDebug) {
-      LOG(DEBUG) <<  "    RevGet: closing connection to server";
+      LOG(debug) <<  "    RevGet: closing connection to server";
     }
     iRC = rclose(&iSocket, 2);
     if ( (iDebug) && (iRC == 0) ) {
-      LOG(DEBUG) <<  " - done" << FairLogger::endl;
+      LOG(debug) <<  " - done";
     }
 
     if (imySig == -1) { iStatus = 5; }          // user break (CTL C)
     else { iStatus = 6; }                       // failure
     imySig = 0;                             // notify CTL C handler
   } else if (iDebug == 1) {
-    LOG(DEBUG) <<  "    RevGet: keeping connection to server" << FairLogger::endl;
+    LOG(debug) <<  "    RevGet: keeping connection to server";
   }
 
   return 0 ;
@@ -832,36 +826,28 @@ Int_t MRevBuffer::RevStatus( Int_t iOut )
 {
   if (iOut) switch(iStatus) {
     case 0:
-      LOG(INFO) <<  "-I- *** Last request for events was successfull"
-           << FairLogger::endl;
+      LOG(info) <<  "-I- *** Last request for events was successfull";
       break;
     case 1:
-      LOG(INFO) <<  "-I- *** Remote event server not yet connected"
-           << FairLogger::endl;
+      LOG(info) <<  "-I- *** Remote event server not yet connected";
       break;
     case 2:
-      LOG(INFO) <<  "-I- *** Remote event server connected, but still no request for events"
-           << FairLogger::endl;
+      LOG(info) <<  "-I- *** Remote event server connected, but still no request for events";
       break;
     case 3:
-      LOG(INFO) <<  "-I- *** Connection to remote event server okay, but currently no DAQ events"
-           << FairLogger::endl;
+      LOG(info) <<  "-I- *** Connection to remote event server okay, but currently no DAQ events";
       break;
     case 4:
-      LOG(INFO) <<  "-I- *** Connection to remote event server closed"
-           << FairLogger::endl;
+      LOG(info) <<  "-I- *** Connection to remote event server closed";
       break;
     case 5:
-      LOG(INFO) <<  "-I- *** Connection to remote event server closed after user break (CTL C)"
-           << FairLogger::endl;
+      LOG(info) <<  "-I- *** Connection to remote event server closed after user break (CTL C)";
       break;
     case 6:
-      LOG(INFO) <<  "-I- *** Connection to remote event server closed after failure"
-           << FairLogger::endl;
+      LOG(info) <<  "-I- *** Connection to remote event server closed after failure";
       break;
     default:
-      LOG(INFO) <<  "-E- Invalid status remote event server found: "
-           << iStatus << FairLogger::endl;
+      LOG(info) <<  "-E- Invalid status remote event server found: " << iStatus;
     }
   return iStatus;
 
@@ -885,30 +871,29 @@ void  MRevBuffer::RevClose( TSocket* pSocket )
   sComm.iBufRequ = htonl(0);             // no more event buffers
 
   if (iDebug == 1)
-    LOG(DEBUG) <<  "-D- send close request (data size "
+    LOG(debug) <<  "-D- send close request (data size "
          << ntohl(sComm.iSize) << " byte): "
          << ntohl(sComm.iMode) << ", "
-         << ntohl(sComm.iBufRequ) << FairLogger::endl;
+         << ntohl(sComm.iBufRequ);
 
   iRC = pSocket->SendRaw(piComm, iCommSize, kDefault);
   if (iRC < 0)
-    LOG(INFO) <<  "-E- sending close request to server, rc = "
-         << iRC << FairLogger::endl;
+    LOG(info) <<  "-E- sending close request to server, rc = " << iRC;
   else if (iDebug == 1) {
-    LOG(DEBUG) <<  "    close request sent" << FairLogger::endl;
+    LOG(debug) <<  "    close request sent";
   }
 
   if (iDebug) {
-    LOG(DEBUG) <<  "    RevClose: closing connection to server";
+    LOG(debug) <<  "    RevClose: closing connection to server";
   }
   iRC = rclose(&iSocket, 2);
   if ( (iDebug) && (iRC == 0) ) {
-    LOG(DEBUG) <<  " - done" << FairLogger::endl;
+    LOG(debug) <<  " - done";
   }
 
   iStatus = 4;                        // connection to server closed
   imySig = 0;                         // notify CTL C handler
-  LOG(INFO) <<  "-I- connection to server closed" << FairLogger::endl;
+  LOG(info) <<  "-I- connection to server closed";
 
 } // RevClose
 
@@ -925,14 +910,14 @@ REvent::REvent()
     subEvtSubType(),
     pSubEvt()
 {
-  // LOG(INFO) <<  "    REvent() ..." << FairLogger::endl;
+  // LOG(info) <<  "    REvent() ...";
 //  iNumb = 0;
 //  piData = 0;
 }
 
 REvent::~REvent()
 {
-  // LOG(INFO) <<  "    ~REvent() ..." << FairLogger::endl;
+  // LOG(info) <<  "    ~REvent() ...";
 }
 
 void REvent::ReFillHead(Int_t* pHead)
@@ -963,13 +948,13 @@ Int_t REvent::ReGetData(Int_t iChan)
 
   //if ( (iChan < 1) || (iChan > iSize/( (signed) sizeof(int))) )
   if ( (iChan < 1) || (iChan > (iSize+4)/( static_cast<signed>(sizeof(short)))) ) {
-    LOG(INFO) <<  "-E- event parameter number " << iChan
+    LOG(info) <<  "-E- event parameter number " << iChan
          << " out of range (" << (iSize+4)/( static_cast<signed>(sizeof(short)))
-         << " long words)" << FairLogger::endl;
+         << " long words)";
     return(-1);
   }
   pint = piData;
   iValue = pint[iChan-1];
-  //LOG(INFO) <<  "    param " <<  iChan << ": " << iValue << FairLogger::endl;
+  //LOG(info) <<  "    param " <<  iChan << ": " << iValue;
   return iValue;
 }

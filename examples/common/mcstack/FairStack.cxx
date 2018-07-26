@@ -2,7 +2,7 @@
  *    Copyright (C) 2014 GSI Helmholtzzentrum fuer Schwerionenforschung GmbH    *
  *                                                                              *
  *              This software is distributed under the terms of the             * 
- *         GNU Lesser General Public Licence version 3 (LGPL) version 3,        *  
+ *              GNU Lesser General Public Licence (LGPL) version 3,             *  
  *                  copied verbatim in the file "LICENSE"                       *
  ********************************************************************************/
 // -------------------------------------------------------------------------
@@ -24,6 +24,7 @@
 #include "TLorentzVector.h"             // for TLorentzVector
 #include "TParticle.h"                  // for TParticle
 #include "TRefArray.h"                  // for TRefArray
+#include "TVirtualMC.h"                 // for gMC
 
 #include <stddef.h>                     // for NULL
 #include <iostream>                     // for operator<<, etc
@@ -171,16 +172,14 @@ TParticle* FairStack::PopPrimaryForTracking(Int_t iPrim)
 
   // Test for index
   if (iPrim < 0 || iPrim >= fNPrimaries) {
-    LOG(FATAL) << "Primary index out of range!" << iPrim 
-	       << FairLogger::endl;
+    LOG(fatal) << "Primary index out of range!" << iPrim;
   }
 
   // Return the iPrim-th TParticle from the fParticle array. This should be
   // a primary.
   TParticle* part = static_cast<TParticle*>(fParticles->At(iPrim));
   if ( ! (part->GetMother(0) < 0) ) {
-    LOG(FATAL) << "Not a primary track!" << iPrim
-	       << FairLogger::endl;
+    LOG(fatal) << "Not a primary track!" << iPrim;
   }
 
   return part;
@@ -195,8 +194,7 @@ TParticle* FairStack::GetCurrentTrack() const
 {
   TParticle* currentPart = GetParticle(fCurrentTrack);
   if ( ! currentPart) {
-    LOG(WARNING) << "Current track not found in stack!" 
-		 << FairLogger::endl;
+    LOG(warn) << "Current track not found in stack!" ;
   }
   return currentPart;
 }
@@ -221,7 +219,7 @@ void FairStack::AddParticle(TParticle* oldPart)
 void FairStack::FillTrackArray()
 {
 
-  LOG(DEBUG) << "Filling MCTrack array..." << FairLogger::endl;
+  LOG(debug) << "Filling MCTrack array...";
 
   // --> Reset index map and number of output tracks
   fIndexMap.clear();
@@ -237,8 +235,7 @@ void FairStack::FillTrackArray()
 
     fStoreIter = fStoreMap.find(iPart);
     if (fStoreIter == fStoreMap.end() ) {
-      LOG(FATAL) << "Particle " << iPart << " not found in storage map! "
-		<<FairLogger::endl;
+      LOG(fatal) << "Particle " << iPart << " not found in storage map! ";
     } else {
       store = (*fStoreIter).second;
     }
@@ -274,7 +271,7 @@ void FairStack::FillTrackArray()
 void FairStack::UpdateTrackIndex(TRefArray* detList)
 {
 
-  LOG(DEBUG) << "Updating track indizes..." << FairLogger::endl;
+  LOG(debug) << "Updating track indizes...";
   Int_t nColl = 0;
 
   // First update mother ID in MCTracks
@@ -283,8 +280,7 @@ void FairStack::UpdateTrackIndex(TRefArray* detList)
     Int_t iMotherOld = track->GetMotherId();
     fIndexIter = fIndexMap.find(iMotherOld);
     if (fIndexIter == fIndexMap.end()) {
-      LOG(FATAL) << "Particle index " << iMotherOld << " not found in index map!"
-		<<FairLogger::endl;
+      LOG(fatal) << "Particle index " << iMotherOld << " not found in index map!";
     } else {
       track->SetMotherId( (*fIndexIter).second );
     }
@@ -317,8 +313,7 @@ void FairStack::UpdateTrackIndex(TRefArray* detList)
 
         fIndexIter = fIndexMap.find(iTrack);
         if (fIndexIter == fIndexMap.end()) {
-          LOG(FATAL) << "Particle index " << iTrack << " not found in index map!"
-		     << FairLogger::endl;
+          LOG(fatal) << "Particle index " << iTrack << " not found in index map!";
         } else {
 	  point->SetTrackID((*fIndexIter).second);
 	  point->SetLink(FairLink("MCTrack", (*fIndexIter).second));
@@ -327,8 +322,8 @@ void FairStack::UpdateTrackIndex(TRefArray* detList)
 
     }   // Collections of this detector
   }     // List of active detectors
-  LOG(DEBUG) << "...stack and  " << nColl << " collections updated."
-	     << FairLogger::endl;
+  LOG(debug) << "...stack and  " << nColl << " collections updated."
+;
 }
 // -------------------------------------------------------------------------
 
@@ -352,7 +347,11 @@ void FairStack::Reset()
 // -----   Public method Register   ----------------------------------------
 void FairStack::Register()
 {
-  FairRootManager::Instance()->Register("MCTrack", "Stack", fTracks,kTRUE);
+  if ( gMC && ( ! gMC->IsMT() ) ) {
+    FairRootManager::Instance()->Register("MCTrack", "Stack", fTracks,kTRUE);
+  } else {
+    FairRootManager::Instance()->RegisterAny("MCTrack",fTracks,kTRUE);
+  }
 }
 // -------------------------------------------------------------------------
 
@@ -361,13 +360,10 @@ void FairStack::Register()
 // -----   Public method Print  --------------------------------------------
 void FairStack::Print(Option_t*) const
 {
-  LOG(INFO) << "FairStack: Number of primaries        = "
-	    << fNPrimaries << FairLogger::endl;
-  LOG(INFO) << "              Total number of particles  = "
-	    << fNParticles << FairLogger::endl;
-  LOG(INFO) << "              Number of tracks in output = "
-	    << fNTracks << FairLogger::endl;
-  if (gLogger->IsLogNeeded(DEBUG1)) {
+  LOG(info) << "FairStack: Number of primaries        = " << fNPrimaries;
+  LOG(info) << "              Total number of particles  = " << fNParticles;
+  LOG(info) << "              Number of tracks in output = " << fNTracks;
+  if (gLogger->IsLogNeeded(fair::Severity::DEBUG1)) {
     for (Int_t iTrack=0; iTrack<fNTracks; iTrack++) {
       (static_cast<FairMCTrack*>( fTracks->At(iTrack))->Print(iTrack));
     }
@@ -419,8 +415,7 @@ Int_t FairStack::GetCurrentParentTrackNumber() const
 TParticle* FairStack::GetParticle(Int_t trackID) const
 {
   if (trackID < 0 || trackID >= fNParticles) {
-    LOG(FATAL) << "Particle index " << trackID << " out of range."
-	       << FairLogger::endl;
+    LOG(fatal) << "Particle index " << trackID << " out of range.";
   }
   return static_cast<TParticle*>(fParticles->At(trackID));
 }

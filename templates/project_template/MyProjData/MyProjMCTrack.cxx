@@ -2,7 +2,7 @@
  *    Copyright (C) 2014 GSI Helmholtzzentrum fuer Schwerionenforschung GmbH    *
  *                                                                              *
  *              This software is distributed under the terms of the             *
- *         GNU Lesser General Public Licence version 3 (LGPL) version 3,        *
+ *              GNU Lesser General Public Licence (LGPL) version 3,             *
  *                  copied verbatim in the file "LICENSE"                       *
  ********************************************************************************/
 
@@ -108,13 +108,12 @@ MyProjMCTrack::~MyProjMCTrack() { }
 // -----   Public method Print   -------------------------------------------
 void MyProjMCTrack::Print(Int_t trackId) const
 {
-  LOG(DEBUG) << "Track " << trackId << ", mother : " << fMotherId << ", Type "
+  LOG(debug) << "Track " << trackId << ", mother : " << fMotherId << ", Type "
              << fPdgCode << ", momentum (" << fPx << ", " << fPy << ", "
-             << fPz << ") GeV" << FairLogger::endl;
- /* LOG(DEBUG2) << "       Ref " << GetNPoints(kREF)
+             << fPz << ") GeV";
+ /* LOG(debug2) << "       Ref " << GetNPoints(kREF)
               << ", TutDet " << GetNPoints(kTutDet)
-              << ", Rutherford " << GetNPoints(kFairRutherford)
-              << FairLogger::endl;
+              << ", Rutherford " << GetNPoints(kFairRutherford);
 */
 }
 // -------------------------------------------------------------------------
@@ -156,8 +155,7 @@ Int_t MyProjMCTrack::GetNPoints(DetectorId detId) const
   else if ( detId == kTutDet  ) { return ( (fNPoints & ( 7 <<  1) ) >>  1); }
   else if ( detId == kFairRutherford ) { return ( (fNPoints & (31 <<  4) ) >>  4); }
   else {
-    LOG(ERROR) << "Unknown detector ID "
-               << detId << FairLogger::endl;
+    LOG(error) << "Unknown detector ID " << detId;
     return 0;
   }
 */
@@ -188,8 +186,7 @@ void MyProjMCTrack::SetNPoints(Int_t iDet, Int_t nPoints)
     fNPoints = ( fNPoints & ( ~ ( 31 <<  4 ) ) )  |  ( nPoints <<  4 );
   }
 
-  else LOG(ERROR) << "Unknown detector ID "
-                    << iDet << FairLogger::endl;
+  else LOG(error) << "Unknown detector ID " << iDet;
 */
 }
 // -------------------------------------------------------------------------

@@ -2,7 +2,7 @@
  *    Copyright (C) 2014 GSI Helmholtzzentrum fuer Schwerionenforschung GmbH    *
  *                                                                              *
  *              This software is distributed under the terms of the             * 
- *         GNU Lesser General Public Licence version 3 (LGPL) version 3,        *  
+ *              GNU Lesser General Public Licence (LGPL) version 3,             *  
  *                  copied verbatim in the file "LICENSE"                       *
  ********************************************************************************/
 /**
@@ -30,12 +30,13 @@
 #include "FairRuntimeDb.h"
 #include "FairRunAna.h"
 #include "FairTask.h"
+#include "FairRootFileSink.h"
 #include "FairFileSource.h"
 
 #include "FairMQDevice.h"
 #include "FairMQSamplerTask.h"
 #include "FairMQLogger.h"
-#include "FairMQProgOptions.h"
+#include <options/FairMQProgOptions.h>
 
 /**
  * Reads simulated digis from a root file and samples the digi as a time-series UDP stream.
@@ -78,7 +79,7 @@ class FairMQSampler : public FairMQDevice
   protected:
     virtual void InitTask()
     {
-        LOG(INFO) << "Initializing Task...";
+        LOG(info) << "Initializing Task...";
 
         fFairRunAna = new FairRunAna();
         fSamplerTask = new Task();
@@ -114,7 +115,7 @@ class FairMQSampler : public FairMQDevice
 
         TString output = fInputFile;
         output.Append(".out.root");
-        fFairRunAna->SetOutputFile(output.Data());
+        fFairRunAna->SetSink(new FairRootFileSink(output.Data()));
 
         fFairRunAna->AddTask(fSamplerTask);
 
@@ -128,7 +129,7 @@ class FairMQSampler : public FairMQDevice
         }
         else
         {
-            LOG(WARN) << "Parameter file not provided. Starting without RuntimeDB.";
+            LOG(warn) << "Parameter file not provided. Starting without RuntimeDB.";
         }
 
         fFairRunAna->Init();
@@ -136,8 +137,8 @@ class FairMQSampler : public FairMQDevice
         FairRootManager* ioman = FairRootManager::Instance();
         fNumEvents = int((ioman->GetInChain())->GetEntries());
 
-        LOG(INFO) << "Task initialized.";
-        LOG(INFO) << "Number of events to process: " << fNumEvents;
+        LOG(info) << "Task initialized.";
+        LOG(info) << "Number of events to process: " << fNumEvents;
     }
 
     virtual void PreRun()
@@ -174,7 +175,7 @@ class FairMQSampler : public FairMQDevice
         }
         catch (std::exception& e)
         {
-            LOG(ERROR) << "Exception when ending AckListener thread: " << e.what();
+            LOG(error) << "Exception when ending AckListener thread: " << e.what();
             exit(EXIT_FAILURE);
         }
     }
@@ -206,7 +207,7 @@ class FairMQSampler : public FairMQDevice
         }
 
         fEnd = std::chrono::high_resolution_clock::now();
-        LOG(INFO) << "Acknowledged " << numAcks << " messages in: " << std::chrono::duration<double, std::milli>(fEnd - fStart).count() << "ms.";
+        LOG(info) << "Acknowledged " << numAcks << " messages in: " << std::chrono::duration<double, std::milli>(fEnd - fStart).count() << "ms.";
     }
 
   private:

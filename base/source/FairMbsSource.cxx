@@ -2,7 +2,7 @@
  *    Copyright (C) 2014 GSI Helmholtzzentrum fuer Schwerionenforschung GmbH    *
  *                                                                              *
  *              This software is distributed under the terms of the             * 
- *         GNU Lesser General Public Licence version 3 (LGPL) version 3,        *  
+ *              GNU Lesser General Public Licence (LGPL) version 3,             *  
  *                  copied verbatim in the file "LICENSE"                       *
  ********************************************************************************/
 // -----------------------------------------------------------------------------
@@ -30,11 +30,10 @@ Bool_t FairMbsSource::Unpack(Int_t *data, Int_t size, Short_t type,
                              Short_t subType, Short_t procId, Short_t subCrate,
                              Short_t control) {
 
-  LOG(DEBUG2)<< "FairMbsSource::Unpack => Found Sub-event with flags: " 
+  LOG(debug2)<< "FairMbsSource::Unpack => Found Sub-event with flags: " 
              << " Type " << type << " SubType " << subType
              << " ProcId " << procId << " SubCrate " << subCrate
-             << " Control " << control
-             << FairLogger::endl;
+             << " Control " << control;
   
   FairUnpack *unpack;
   Bool_t seen = kFALSE;

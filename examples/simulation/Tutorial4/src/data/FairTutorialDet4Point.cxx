@@ -2,7 +2,7 @@
  *    Copyright (C) 2014 GSI Helmholtzzentrum fuer Schwerionenforschung GmbH    *
  *                                                                              *
  *              This software is distributed under the terms of the             * 
- *         GNU Lesser General Public Licence version 3 (LGPL) version 3,        *  
+ *              GNU Lesser General Public Licence (LGPL) version 3,             *  
  *                  copied verbatim in the file "LICENSE"                       *
  ********************************************************************************/
 #include "FairTutorialDet4Point.h"
@@ -33,16 +33,13 @@ FairTutorialDet4Point::~FairTutorialDet4Point() { }
 // -----   Public method Print   -------------------------------------------
 void FairTutorialDet4Point::Print(const Option_t* /*opt*/) const
 {
-  LOG(INFO) << "-I- FairTutorialDet4Point: TutorialDet point for track " 
-	    << fTrackID
-	    << " in detector " << fDetectorID << FairLogger::endl;
-  LOG(INFO) << "    Position (" << fX << ", " << fY << ", " << fZ
-	    << ") cm" << FairLogger::endl;
-  LOG(INFO) << "    Momentum (" << fPx << ", " << fPy << ", " << fPz
-	    << ") GeV" << FairLogger::endl;
-  LOG(INFO) << "    Time " << fTime << " ns,  Length " << fLength
-	    << " cm,  Energy loss " << fELoss*1.0e06 << " keV" 
-	    << FairLogger::endl;
+  LOG(info) << "-I- FairTutorialDet4Point: TutorialDet point for track "
+            << fTrackID
+            << " in detector " << fDetectorID;
+  LOG(info) << "    Position (" << fX << ", " << fY << ", " << fZ << ") cm";
+  LOG(info) << "    Momentum (" << fPx << ", " << fPy << ", " << fPz << ") GeV";
+  LOG(info) << "    Time " << fTime << " ns,  Length " << fLength
+            << " cm,  Energy loss " << fELoss*1.0e06 << " keV";
 }
 // -------------------------------------------------------------------------
 

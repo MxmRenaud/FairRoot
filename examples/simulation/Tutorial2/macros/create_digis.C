@@ -2,7 +2,7 @@
  *    Copyright (C) 2014 GSI Helmholtzzentrum fuer Schwerionenforschung GmbH    *
  *                                                                              *
  *              This software is distributed under the terms of the             * 
- *         GNU Lesser General Public Licence version 3 (LGPL) version 3,        *  
+ *              GNU Lesser General Public Licence (LGPL) version 3,             *  
  *                  copied verbatim in the file "LICENSE"                       *
  ********************************************************************************/
 void create_digis(){
@@ -29,7 +29,7 @@ void create_digis(){
     FairFileSource *fFileSource = new FairFileSource(inFile);
     fRun->SetSource(fFileSource);
 
-    fRun->SetOutputFile(outFile);
+    fRun->SetSink(new FairRootFileSink(outFile));
 
 
     // Init Simulation Parameters from Root File

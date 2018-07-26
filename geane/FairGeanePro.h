@@ -2,7 +2,7 @@
  *    Copyright (C) 2014 GSI Helmholtzzentrum fuer Schwerionenforschung GmbH    *
  *                                                                              *
  *              This software is distributed under the terms of the             * 
- *         GNU Lesser General Public Licence version 3 (LGPL) version 3,        *  
+ *              GNU Lesser General Public Licence (LGPL) version 3,             *  
  *                  copied verbatim in the file "LICENSE"                       *
  ********************************************************************************/
 // Class for the interface to propagate track parameters with GEANE
@@ -12,7 +12,7 @@
 #ifndef FAIRGEANEPRO_H
 #define FAIRGEANEPRO_H 1
 
-#include "TNamed.h"                     // for TNamed
+#include "FairPropagator.h"                     // for TNamed
 
 #include "Rtypes.h"                     // for Int_t, Bool_t, Double_t, etc
 #include "TGeant3.h"                    // for Ertrio_t, etc
@@ -25,7 +25,7 @@ class FairTrackParH;
 class FairGeaneApplication;
 class TDatabasePDG;
 
-class FairGeanePro : public TNamed
+class FairGeanePro : public FairPropagator
 {
 
   public:
@@ -65,6 +65,7 @@ class FairGeanePro : public TNamed
     TVector3 GetPCAOnWire() { return fvwi; }
     TVector3 GetPCAOnTrack() { return fvpf; }
     Float_t GetLengthAtPCA() { return ftrklength; }
+    Float_t GetTimeAtPCA() { return ftrktime; }
     Bool_t PropagateToVirtualPlaneAtPCA(Int_t pca);
     Bool_t BackTrackToVertex();
     Bool_t BackTrackToVirtualPlaneAtPCA(Int_t pca);
@@ -113,6 +114,7 @@ class FairGeanePro : public TNamed
     Double_t fRad, fDi;
     TVector3 fvpf, fvwi;
     Float_t ftrklength;
+    Float_t ftrktime;
     Int_t flag;
     FairGeaneApplication* fApp;
     Double_t trpmat[5][5];
@@ -123,7 +125,7 @@ class FairGeanePro : public TNamed
     FairGeanePro(const FairGeanePro&);
     FairGeanePro& operator=(const FairGeanePro&);
 
-    ClassDef(FairGeanePro,1);
+    ClassDef(FairGeanePro,2);
 };
 
 #endif

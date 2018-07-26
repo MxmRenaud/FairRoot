@@ -2,7 +2,7 @@
  *    Copyright (C) 2014 GSI Helmholtzzentrum fuer Schwerionenforschung GmbH    *
  *                                                                              *
  *              This software is distributed under the terms of the             * 
- *         GNU Lesser General Public Licence version 3 (LGPL) version 3,        *  
+ *              GNU Lesser General Public Licence (LGPL) version 3,             *  
  *                  copied verbatim in the file "LICENSE"                       *
  ********************************************************************************/
 #include "FairCaptureOutputNew.h"
@@ -25,8 +25,7 @@ FairCaptureOutputNew::~FairCaptureOutputNew()
 void FairCaptureOutputNew::BeginCapture()
 {
   if (fCaptureStdOut && fCaptureStdErr) {
-    std::cout << "Can't capture stdout and stderr at the same time."
-              << std::endl;
+    std::cout << "Can't capture stdout and stderr at the same time." << std::endl;
     exit(1);
   }
   if (fCaptureStdOut) {

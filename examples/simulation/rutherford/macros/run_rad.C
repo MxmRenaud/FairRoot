@@ -2,7 +2,7 @@
  *    Copyright (C) 2014 GSI Helmholtzzentrum fuer Schwerionenforschung GmbH    *
  *                                                                              *
  *              This software is distributed under the terms of the             * 
- *         GNU Lesser General Public Licence version 3 (LGPL) version 3,        *  
+ *              GNU Lesser General Public Licence (LGPL) version 3,             *  
  *                  copied verbatim in the file "LICENSE"                       *
  ********************************************************************************/
 void run_rad(Int_t nEvents = 100, TString mcEngine="TGeant3")
@@ -20,6 +20,9 @@ void run_rad(Int_t nEvents = 100, TString mcEngine="TGeant3")
   TString outDir  = "data";
   TString outFile = outDir + "/test1_";
   outFile = outFile + mcEngine + ".mc.root";
+
+  TString geoFile = outDir + "/geofile_rad_";
+  geoFile = geoFile + mcEngine + "_full.root";
 
   TString parFile = outDir + "/params1_";    
   parFile = parFile + mcEngine + ".root";   
@@ -48,7 +51,7 @@ void run_rad(Int_t nEvents = 100, TString mcEngine="TGeant3")
   // -----   Create simulation run   ----------------------------------------
   FairRunSim* run = new FairRunSim();
   run->SetName(mcEngine);              // Transport engine
-  run->SetOutputFile(outFile);          // Output file
+  run->SetSink(new FairRootFileSink(outFile));          // Output file
   FairRuntimeDb* rtdb = run->GetRuntimeDb();
   // ------------------------------------------------------------------------
   
@@ -122,7 +125,7 @@ void run_rad(Int_t nEvents = 100, TString mcEngine="TGeant3")
   // -----   Start run   ----------------------------------------------------
   run->Run(nEvents);
   // ------------------------------------------------------------------------
-  run->CreateGeometryFile("data/geofile_full.root");
+  run->CreateGeometryFile(geoFile);
   
   // -----   Finish   -------------------------------------------------------
 

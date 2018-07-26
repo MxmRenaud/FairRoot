@@ -15,11 +15,6 @@ struct MsgPack {};
 // struct MsgPackRef { msgpack::vrefbuffer vbuf; std::vector<msgpack::type::tuple<int, int, double, double, double, double, double, double>> hits; };
 // struct MsgPackStream {};
 
-void free_sbuffer(void* /*data*/, void* obj)
-{
-    delete static_cast<msgpack::sbuffer*>(obj);
-}
-
 template <>
 void FairTestDetectorMQRecoTask<FairTestDetectorDigi, FairTestDetectorHit, MsgPack, MsgPack>::Exec(Option_t* opt)
 {
@@ -49,7 +44,7 @@ void FairTestDetectorMQRecoTask<FairTestDetectorDigi, FairTestDetectorHit, MsgPa
 
     if (!fRecoTask->fDigiArray)
     {
-        LOG(ERROR) << "FairTestDetectorMQRecoTask::Exec(): No Point array!";
+        LOG(error) << "FairTestDetectorMQRecoTask::Exec(): No Point array!";
     }
 
     // execute task on the deserialized data (digis)
@@ -71,7 +66,10 @@ void FairTestDetectorMQRecoTask<FairTestDetectorDigi, FairTestDetectorHit, MsgPa
 
     packer.pack(hits);
 
-    fPayload->Rebuild(sbuf->data(), sbuf->size(), free_sbuffer, sbuf);
+    fPayload->Rebuild(sbuf->data(),
+                      sbuf->size(),
+                      [](void* /* data */, void* obj) { delete static_cast<msgpack::sbuffer*>(obj); },
+                      sbuf);
 }
 
 // MsgPackRef version sends the vector of tuples without copying it into the sbuffer
@@ -101,7 +99,7 @@ void FairTestDetectorMQRecoTask<FairTestDetectorDigi, FairTestDetectorHit, MsgPa
 
 //     if (!fRecoTask->fDigiArray)
 //     {
-//         LOG(ERROR) << "FairTestDetectorMQRecoTask::Exec(): No Point array!";
+//         LOG(error) << "FairTestDetectorMQRecoTask::Exec(): No Point array!";
 //     }
 
 //     fRecoTask->Exec(opt);
@@ -144,7 +142,7 @@ void FairTestDetectorMQRecoTask<FairTestDetectorDigi, FairTestDetectorHit, MsgPa
 
 //     if (!fRecoTask->fDigiArray)
 //     {
-//         LOG(ERROR) << "FairTestDetectorMQRecoTask::Exec(): No Point array!";
+//         LOG(error) << "FairTestDetectorMQRecoTask::Exec(): No Point array!";
 //     }
 
 //     fRecoTask->Exec(opt);

@@ -2,7 +2,7 @@
  *    Copyright (C) 2014 GSI Helmholtzzentrum fuer Schwerionenforschung GmbH    *
  *                                                                              *
  *              This software is distributed under the terms of the             * 
- *         GNU Lesser General Public Licence version 3 (LGPL) version 3,        *  
+ *              GNU Lesser General Public Licence (LGPL) version 3,             *  
  *                  copied verbatim in the file "LICENSE"                       *
  ********************************************************************************/
 // -------------------------------------------------------------------------
@@ -78,7 +78,7 @@ FairRunOnline::FairRunOnline()
 {
   fgRinstance = this;
   fAna = kTRUE;
-  LOG(INFO) << "FairRunOnline constructed at " << this << FairLogger::endl;
+  LOG(info) << "FairRunOnline constructed at " << this;
 }
 //_____________________________________________________________________________
 FairRunOnline::FairRunOnline(FairSource* source)
@@ -94,7 +94,7 @@ FairRunOnline::FairRunOnline(FairSource* source)
   fRootManager->SetSource(source);
   fgRinstance = this;
   fAna = kTRUE;
-  LOG(INFO) << "FairRunOnline constructed at " << this << FairLogger::endl;
+  LOG(info) << "FairRunOnline constructed at " << this;
 }
 //_____________________________________________________________________________
 
@@ -128,15 +128,16 @@ void handler_ctrlc(int)
 //_____________________________________________________________________________
 void FairRunOnline::Init()
 {
-  LOG(INFO)<<"FairRunOnline::Init"<<FairLogger::endl;
+  LOG(info)<<"FairRunOnline::Init";
   if (fIsInitialized) {
-    LOG(FATAL) << "Error Init is already called before!" << FairLogger::endl;
+    LOG(fatal) << "Error Init is already called before!";
     exit(-1);
   } else {
     fIsInitialized = kTRUE;
   }
 
   fRootManager->InitSource();
+  fRootManager->InitSink();
 
   //  FairGeoLoader* loader = new FairGeoLoader("TGeo", "Geo Loader");
   //  FairGeoInterface* GeoInterFace = loader->getGeoInterface();
@@ -214,10 +215,10 @@ void FairRunOnline::Init()
   //  InitContainers();
   // --- Get event header from Run
   if ( ! fEvtHeader ) {
-    LOG(FATAL) << "FairRunOnline::InitContainers:No event header in run!" << FairLogger::endl;
+    LOG(fatal) << "FairRunOnline::InitContainers:No event header in run!";
     return;
   }
-  LOG(INFO) << "FairRunOnline::InitContainers: event header at " << fEvtHeader << FairLogger::endl;
+  LOG(info) << "FairRunOnline::InitContainers: event header at " << fEvtHeader;
   fRootManager->Register("EventHeader.", "Event", fEvtHeader, kTRUE);
   fEvtHeader->SetRunId(fRunId);
 
@@ -227,11 +228,9 @@ void FairRunOnline::Init()
   fTask->InitTask();
 
   // create the output tree after tasks initialisation
-  fOutFile->cd();
-  TTree* outTree =new TTree(FairRootManager::GetTreeName(), "/cbmout", 99);
-  fRootManager->TruncateBranchNames(outTree, "cbmout");
-  fRootManager->SetOutTree(outTree);
+  fRootManager->InitSink();
   fRootManager->WriteFolder();
+  fRootManager->WriteFileHeader(fFileHeader);
 }
 //_____________________________________________________________________________
 
@@ -243,9 +242,9 @@ void FairRunOnline::InitContainers()
   fRtdb = GetRuntimeDb();
   FairBaseParSet* par=static_cast<FairBaseParSet*>
                       (fRtdb->getContainer("FairBaseParSet"));
-  LOG(INFO) << "FairRunOnline::InitContainers: par = " << par << FairLogger::endl;
+  LOG(info) << "FairRunOnline::InitContainers: par = " << par;
   if (NULL == par)
-    LOG(WARNING)<<"FairRunOnline::InitContainers: no  'FairBaseParSet' container !"<<FairLogger::endl;
+    LOG(warn)<<"FairRunOnline::InitContainers: no  'FairBaseParSet' container !";
 
   if (par) {
     fEvtHeader = static_cast<FairEventHeader*>(fRootManager->GetObject("EventHeader."));
@@ -269,10 +268,10 @@ void FairRunOnline::InitContainers()
       //      fEvtHeader = dynamic_cast<FairEventHeader*> (FairRunOnline::Instance()->GetEventHeade
       GetEventHeader();
       if ( ! fEvtHeader ) {
-	LOG(FATAL) << "FairRunOnline::InitContainers:No event header in run!" << FairLogger::endl;
+	LOG(fatal) << "FairRunOnline::InitContainers:No event header in run!";
 	return;
       }
-      LOG(INFO) << "FairRunOnline::InitContainers: event header at " << fEvtHeader << FairLogger::endl;
+      LOG(info) << "FairRunOnline::InitContainers: event header at " << fEvtHeader;
       fRootManager->Register("EventHeader.", "Event", fEvtHeader, kTRUE);
     }
 }
@@ -286,7 +285,7 @@ Int_t FairRunOnline::EventLoop()
   Int_t tmpId = fEvtHeader->GetRunId();
 
   if ( tmpId != -1 && tmpId != fRunId ) {
-    LOG(INFO) << "FairRunOnline::EventLoop() Call Reinit due to changed RunID (from " << fRunId << " to " << tmpId << FairLogger::endl;
+    LOG(info) << "FairRunOnline::EventLoop() Call Reinit due to changed RunID (from " << fRunId << " to " << tmpId;
     fRunId = tmpId;
     Reinit( fRunId );
     fRootManager->GetSource()->ReInitUnpackers();
@@ -316,8 +315,6 @@ Int_t FairRunOnline::EventLoop()
 //_____________________________________________________________________________
 void FairRunOnline::Run(Int_t Ev_start, Int_t Ev_end)
 {
-  fOutFile->cd();
-  
   fNevents = 0;
 
   gIsInterrupted = kFALSE;
@@ -398,7 +395,7 @@ void FairRunOnline::Finish()
   fRootManager->Write();
   fRootManager->GetSource()->Close();
 
-  fRootManager->CloseOutFile();
+  fRootManager->CloseSink();
 }
 //_____________________________________________________________________________
 
@@ -440,11 +437,9 @@ void  FairRunOnline::SetContainerStatic(Bool_t tempBool)
 {
   fStatic=tempBool;
   if ( fStatic ) {
-    LOG(INFO) << "Parameter Cont. initialisation is static" 
-	      << FairLogger::endl;
+    LOG(info) << "Parameter Cont. initialisation is static";
   } else {
-    LOG(INFO) << "Parameter Cont. initialisation is NOT static"
-	      << FairLogger::endl;
+    LOG(info) << "Parameter Cont. initialisation is NOT static";
   }
 }
 //_____________________________________________________________________________
@@ -474,7 +469,7 @@ void FairRunOnline::AddObject(TObject* object)
         }
         else
         {
-            LOG(WARNING) << "FairRunOnline::AddObject : unrecognized object type : " << classname << FairLogger::endl;
+            LOG(warn) << "FairRunOnline::AddObject : unrecognized object type : " << classname;
         }
     }
 }

@@ -2,7 +2,7 @@
  *    Copyright (C) 2014 GSI Helmholtzzentrum fuer Schwerionenforschung GmbH    *
  *                                                                              *
  *              This software is distributed under the terms of the             * 
- *         GNU Lesser General Public Licence version 3 (LGPL) version 3,        *  
+ *              GNU Lesser General Public Licence (LGPL) version 3,             *  
  *                  copied verbatim in the file "LICENSE"                       *
  ********************************************************************************/
 void run_sim(Int_t nEvents=100, TString mcEngine="TGeant3")
@@ -33,11 +33,14 @@ void run_sim(Int_t nEvents=100, TString mcEngine="TGeant3")
   TString outFile = "data/testrun_";
   outFile = outFile + mcEngine + ".root";
 
+  TString geoFile = "data/geofile_";
+  geoFile = geoFile + mcEngine + "_full.root";
+
   TString parFile = "data/testparams_";
   parFile = parFile + mcEngine + ".root";
 
   
-  fRun->SetOutputFile(outFile);
+  fRun->SetSink(new FairRootFileSink(outFile));
   fRun->SetGenerateRunInfo(kTRUE);       // Create FairRunInfo file
 
   // -----   Magnetic field   -------------------------------------------
@@ -120,7 +123,7 @@ void run_sim(Int_t nEvents=100, TString mcEngine="TGeant3")
   //  Int_t nEvents = 1;
   fRun->Run(nEvents);
 
-  fRun->CreateGeometryFile("data/geofile_full.root");
+  fRun->CreateGeometryFile(geoFile);
 
   // -----   Finish   -------------------------------------------------------
 

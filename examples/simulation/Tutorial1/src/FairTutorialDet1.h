@@ -2,7 +2,7 @@
  *    Copyright (C) 2014 GSI Helmholtzzentrum fuer Schwerionenforschung GmbH    *
  *                                                                              *
  *              This software is distributed under the terms of the             * 
- *         GNU Lesser General Public Licence version 3 (LGPL) version 3,        *  
+ *              GNU Lesser General Public Licence (LGPL) version 3,             *  
  *                  copied verbatim in the file "LICENSE"                       *
  ********************************************************************************/
 #ifndef FAIRTUTORIALDET1_H
@@ -15,6 +15,7 @@
 #include "TVector3.h"                   // for TVector3
 
 class FairTutorialDet1Point;
+class FairTutorialDet1Geo;
 class FairVolume;
 class TClonesArray;
 
@@ -80,8 +81,12 @@ class FairTutorialDet1: public FairDetector
     virtual void   PreTrack() {;}
     virtual void   BeginEvent() {;}
 
+    virtual FairModule* CloneModule() const;
 
   private:
+    void SetSensitiveVolumes();
+
+    static FairTutorialDet1Geo* fgGeo;   //!
 
     /** Track information to be stored until the track leaves the
     active volume.

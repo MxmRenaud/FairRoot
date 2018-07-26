@@ -2,7 +2,7 @@
  *    Copyright (C) 2014 GSI Helmholtzzentrum fuer Schwerionenforschung GmbH    *
  *                                                                              *
  *              This software is distributed under the terms of the             * 
- *         GNU Lesser General Public Licence version 3 (LGPL) version 3,        *  
+ *              GNU Lesser General Public Licence (LGPL) version 3,             *  
  *                  copied verbatim in the file "LICENSE"                       *
  ********************************************************************************/
 
@@ -13,7 +13,7 @@
 
 void SetCuts()
 {
-  cout << "SetCuts Macro: Setting Processes.." <<endl;
+  //  cout << "SetCuts Macro: Setting Processes.." <<endl;
    
   // ------>>>> IMPORTANT!!!!
   // For a correct comparison between GEANE and MC (pull distributions) 
@@ -43,7 +43,7 @@ void SetCuts()
   Double_t cut1 = 1.0E-3;         // GeV --> 1 MeV
   Double_t cutb = 1.0E4;          // GeV --> 10 TeV
   Double_t tofmax = 1.E10;        // seconds
-  cout << "SetCuts Macro: Setting cuts.." <<endl;
+  //  cout << "SetCuts Macro: Setting cuts.." <<endl;
   
   MC->SetCut("CUTGAM",cut1);   /** gammas (GeV)*/
   MC->SetCut("CUTELE",cut1);   /** electrons (GeV)*/

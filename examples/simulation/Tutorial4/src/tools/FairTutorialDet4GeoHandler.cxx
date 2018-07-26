@@ -2,7 +2,7 @@
  *    Copyright (C) 2014 GSI Helmholtzzentrum fuer Schwerionenforschung GmbH    *
  *                                                                              *
  *              This software is distributed under the terms of the             * 
- *         GNU Lesser General Public Licence version 3 (LGPL) version 3,        *  
+ *              GNU Lesser General Public Licence (LGPL) version 3,             *  
  *                  copied verbatim in the file "LICENSE"                       *
  ********************************************************************************/
 // -------------------------------------------------------------------------
@@ -189,7 +189,7 @@ const char* FairTutorialDet4GeoHandler::CurrentVolOffName(Int_t off) const
 void FairTutorialDet4GeoHandler::NavigateTo(TString volName)
 {
   if (fIsSimulation) {
-    LOG(FATAL)<<"This methode is not supported in simulation mode"<<FairLogger::endl;
+    LOG(fatal)<<"This methode is not supported in simulation mode";
   } else {
     gGeoManager->cd(volName.Data());
     fGeoPathHash = volName.Hash();
@@ -197,7 +197,7 @@ void FairTutorialDet4GeoHandler::NavigateTo(TString volName)
     fVolumeShape = static_cast<TGeoBBox*>(fCurrentVolume->GetShape());
     Double_t local[3] = {0., 0., 0.};  // Local centre of volume
     gGeoManager->LocalToMaster(local, fGlobal);
-    LOG(DEBUG2)<<"Pos: "<<fGlobal[0]<<" , "<<fGlobal[1]<<" , "<<fGlobal[2]<<FairLogger::endl;
+    LOG(debug2)<<"Pos: "<<fGlobal[0]<<" , "<<fGlobal[1]<<" , "<<fGlobal[2];
 //    fGlobalMatrix = gGeoManager->GetCurrentMatrix();
   }
 }

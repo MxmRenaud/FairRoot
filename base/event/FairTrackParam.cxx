@@ -2,7 +2,7 @@
  *    Copyright (C) 2014 GSI Helmholtzzentrum fuer Schwerionenforschung GmbH    *
  *                                                                              *
  *              This software is distributed under the terms of the             * 
- *         GNU Lesser General Public Licence version 3 (LGPL) version 3,        *  
+ *              GNU Lesser General Public Licence (LGPL) version 3,             *  
  *                  copied verbatim in the file "LICENSE"                       *
  ********************************************************************************/
 // -------------------------------------------------------------------------
@@ -79,11 +79,10 @@ FairTrackParam::~FairTrackParam() {}
 // -----   Public method Print   -------------------------------------------
 void FairTrackParam::Print(Option_t*) const
 {
-  LOG(INFO) << "Position : (" << std::setprecision(2)
-	    << fX << ", " << fY << ", " << fZ << ")" << FairLogger::endl;
-  LOG(INFO) << "Slopes : dx/dz = " << fTx << ", dy/dz = " << fTy 
-	    << FairLogger::endl;
-  LOG(INFO) << "q/p = " << fQp << FairLogger::endl;
+  LOG(info) << "Position : (" << std::setprecision(2)
+	    << fX << ", " << fY << ", " << fZ << ")";
+  LOG(info) << "Slopes : dx/dz = " << fTx << ", dy/dz = " << fTy;
+  LOG(info) << "q/p = " << fQp;
 }
 // -------------------------------------------------------------------------
 
@@ -133,8 +132,8 @@ void FairTrackParam::CovMatrix(TMatrixFSym& covMat) const
 Double_t FairTrackParam::GetCovariance(Int_t i, Int_t j) const
 {
   if ( i<0 || j<0 || i>4 || j>4 ) {
-    LOG(ERROR) << "FairTrackParam::GetCovariance: Invalid index pair ("
-	       << i << "," << j << ") !" << FairLogger::endl;
+    LOG(error) << "FairTrackParam::GetCovariance: Invalid index pair ("
+	       << i << "," << j << ") !";
     return 0;
   }
   if (i>j) {
@@ -190,13 +189,13 @@ void FairTrackParam::SetCovMatrix(const TMatrixFSym& covMat)
 void FairTrackParam::SetCovariance(Int_t i, Int_t j, Double_t val)
 {
   if (i < 0 || i > 4) {
-    LOG(WARNING) << "FairTrackParam::SetCovariance: "
-		 << "First index out of range!  " << i << FairLogger::endl;
+    LOG(warn) << "FairTrackParam::SetCovariance: "
+		 << "First index out of range!  " << i;
     return;
   }
   if (j < 0 || j > 4) {
-    LOG(WARNING) << "FairTrackParam::SetCovariance: "
-         << "Second index out of range!  " << j << FairLogger::endl;
+    LOG(warn) << "FairTrackParam::SetCovariance: "
+         << "Second index out of range!  " << j;
     return;
   }
   if (i>j) {

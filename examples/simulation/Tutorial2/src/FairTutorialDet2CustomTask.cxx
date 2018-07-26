@@ -2,7 +2,7 @@
  *    Copyright (C) 2014 GSI Helmholtzzentrum fuer Schwerionenforschung GmbH    *
  *                                                                              *
  *              This software is distributed under the terms of the             * 
- *         GNU Lesser General Public Licence version 3 (LGPL) version 3,        *  
+ *              GNU Lesser General Public Licence (LGPL) version 3,             *  
  *                  copied verbatim in the file "LICENSE"                       *
  ********************************************************************************/
 #include "FairTutorialDet2CustomTask.h"
@@ -40,18 +40,17 @@ FairTutorialDet2CustomTask::~FairTutorialDet2CustomTask()
 // ---- Init ----------------------------------------------------------
 InitStatus FairTutorialDet2CustomTask::Init()
 {
-  LOG(INFO) << " FairTutorialDet2CustomTask :: Init() " 
-	    << FairLogger::endl;
+  LOG(info) << " FairTutorialDet2CustomTask :: Init() ";
 
   FairRootManager* ioman = FairRootManager::Instance();
   if ( ! ioman ) { 
-    LOG(FATAL) << "No FairRootManager" << FairLogger::endl; 
+    LOG(fatal) << "No FairRootManager"; 
     return kERROR;
   } else {
     fCustomData=ioman->InitObjectAs<std::vector<CustomClass> const*>("TutorialCustomData");
     if ( ! fCustomData ) {
-      LOG(ERROR) << "No input data found!" << FairLogger::endl;
-      LOG(ERROR) << "Task will be inactive" << FairLogger::endl;
+      LOG(error) << "No input data found!";
+      LOG(error) << "Task will be inactive";
       return kERROR;
     }
 
@@ -71,18 +70,17 @@ InitStatus FairTutorialDet2CustomTask::Init()
 void FairTutorialDet2CustomTask::Exec(Option_t* /*option*/)
 {
   // Here we print something
-  LOG(INFO) <<" I am in FairTutorialDet2CustomTask::Exec" 
-	    << FairLogger::endl;
+  LOG(info) <<" I am in FairTutorialDet2CustomTask::Exec";
 
-  LOG(INFO) << " The custom data input vector has size" << fCustomData->size() << "\n"; 
+  LOG(info) << " The custom data input vector has size" << fCustomData->size();
   for(auto& entry : *fCustomData) {
-    LOG(INFO) << " Got entry " << entry.GetX() << " " << entry.GetQ() << "\n";
+    LOG(info) << " Got entry " << entry.GetX() << " " << entry.GetQ();
   }
 
   // process data that we got from DigitizerTask
-  LOG(INFO) << " The input vector from DigitizerTask has size" << fCustomData2->size() << "\n"; 
+  LOG(info) << " The input vector from DigitizerTask has size" << fCustomData2->size();
   for(auto& entry : *fCustomData2) {
-    LOG(INFO) << " Got entry " << entry.GetX() << " " << entry.GetQ() << "\n";
+    LOG(info) << " Got entry " << entry.GetX() << " " << entry.GetQ();
   }
 
 }

@@ -2,7 +2,7 @@
  *    Copyright (C) 2014 GSI Helmholtzzentrum fuer Schwerionenforschung GmbH    *
  *                                                                              *
  *              This software is distributed under the terms of the             * 
- *         GNU Lesser General Public Licence version 3 (LGPL) version 3,        *  
+ *              GNU Lesser General Public Licence (LGPL) version 3,             *  
  *                  copied verbatim in the file "LICENSE"                       *
  ********************************************************************************/
 //*-- AUTHOR : Ilse Koenig
@@ -101,7 +101,7 @@ void FairGeoMedia::print()
 void FairGeoMedia::read(std::fstream& fin)
 {
   // Reads the media from file
-  LOG(INFO) << "FairGeoMedia: Read media " << FairLogger::endl;
+  LOG(info) << "FairGeoMedia: Read media ";
   const Int_t maxBuf=256;
   char buf[maxBuf];
   Int_t autoflag=1;

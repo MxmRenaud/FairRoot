@@ -2,7 +2,7 @@
  *    Copyright (C) 2014 GSI Helmholtzzentrum fuer Schwerionenforschung GmbH    *
  *                                                                              *
  *              This software is distributed under the terms of the             * 
- *         GNU Lesser General Public Licence version 3 (LGPL) version 3,        *  
+ *              GNU Lesser General Public Licence (LGPL) version 3,             *  
  *                  copied verbatim in the file "LICENSE"                       *
  ********************************************************************************/
 // $Id: FairLinkDef.h,v 1.4 2006/09/15 12:43:35 turany Exp $
@@ -57,6 +57,7 @@
 #pragma link C++ class FairRadGridManager+;
 #pragma link C++ class FairRadMapManager+;
 #pragma link C++ class FairMesh+;
+#pragma link C++ class FairPropagator+;
 #pragma link C++ class FairRKPropagator+;
 #pragma link C++ class FairTimeStamp+;
 #pragma link C++ class FairRadMapPoint+;
@@ -68,6 +69,7 @@
 #pragma link C++ class FairRingSorterTask;
 #pragma link C++ class FairAnaSelector+;
 #pragma link C++ class FairLinkManager+;
+#pragma link C++ class FairPrintFairLinks;
 
 
 #pragma link C++ class FairRunOnline;
@@ -75,6 +77,9 @@
 #pragma link C++ class FairFileSource;
 #pragma link C++ class FairMixedSource;
 #pragma link C++ class FairOnlineSource;
+
+#pragma link C++ class FairSink;
+#pragma link C++ class FairRootFileSink;
 #ifdef BUILD_MBS
 #pragma link C++ class FairMbsSource;
 #pragma link C++ class FairRemoteSource;

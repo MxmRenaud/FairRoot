@@ -2,7 +2,7 @@
  *    Copyright (C) 2014 GSI Helmholtzzentrum fuer Schwerionenforschung GmbH    *
  *                                                                              *
  *              This software is distributed under the terms of the             * 
- *         GNU Lesser General Public Licence version 3 (LGPL) version 3,        *  
+ *              GNU Lesser General Public Licence (LGPL) version 3,             *  
  *                  copied verbatim in the file "LICENSE"                       *
  ********************************************************************************/
 #include "FairTestDetectorTimeDigiTask.h"
@@ -45,16 +45,16 @@ InitStatus FairTestDetectorTimeDigiTask::Init()
     FairRootManager* ioman = FairRootManager::Instance();
     if (!ioman)
     {
-        LOG(ERROR) << "FairTestDetectorTimeDigiTask::Init: " 
-		   << "RootManager not instantiated!" << FairLogger::endl;
+        LOG(error) << "FairTestDetectorTimeDigiTask::Init: " 
+		   << "RootManager not instantiated!";
         return kFATAL;
     }
 
     fPointArray = static_cast<TClonesArray*>(ioman->GetObject("FairTestDetectorPoint"));
     if (!fPointArray)
     {
-        LOG(WARNING) << "FairTestDetectorTimeDigiTask::Init: "
-		     << "No Point array!" << FairLogger::endl;
+        LOG(warn) << "FairTestDetectorTimeDigiTask::Init: "
+		     << "No Point array!";
         return kERROR;
     }
 
@@ -74,9 +74,8 @@ void FairTestDetectorTimeDigiTask::Exec(Option_t* /*opt*/)
 
     // fill the map
 
-    LOG(INFO) << "EventTime: " 
-	      << FairRootManager::Instance()->GetEventTime() 
-	      << FairLogger::endl;
+    LOG(info) << "EventTime: " 
+	      << FairRootManager::Instance()->GetEventTime();
 
     for (int ipnt = 0; ipnt < fPointArray->GetEntries(); ipnt++)
     {

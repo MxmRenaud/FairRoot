@@ -2,7 +2,7 @@
  *    Copyright (C) 2014 GSI Helmholtzzentrum fuer Schwerionenforschung GmbH    *
  *                                                                              *
  *              This software is distributed under the terms of the             * 
- *         GNU Lesser General Public Licence version 3 (LGPL) version 3,        *  
+ *              GNU Lesser General Public Licence (LGPL) version 3,             *  
  *                  copied verbatim in the file "LICENSE"                       *
  ********************************************************************************/
 #ifndef FAIRRUNTIMEDB_H
@@ -59,6 +59,7 @@ class FairRuntimeDb : public TObject
     Bool_t addParamContext(const char*);
     void printParamContexts();
     void addContFactory(FairContFact*);
+    void removeContFactory(FairContFact* fact);
     FairContFact* getContFactory(const Text_t*);
 
     Bool_t addContainer(FairParSet*);

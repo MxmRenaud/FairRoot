@@ -2,7 +2,7 @@
  #    Copyright (C) 2014 GSI Helmholtzzentrum fuer Schwerionenforschung GmbH    #
  #                                                                              #
  #              This software is distributed under the terms of the             # 
- #         GNU Lesser General Public Licence version 3 (LGPL) version 3,        #  
+ #              GNU Lesser General Public Licence (LGPL) version 3,             #  
  #                  copied verbatim in the file "LICENSE"                       #
  ################################################################################
 Set(CTEST_SOURCE_DIRECTORY $ENV{SOURCEDIR})
@@ -86,8 +86,6 @@ EndIf()
 
 Ctest_Submit()
  
-if (${CTEST_SITE} MATCHES "Travis")
-  if (_ctest_test_ret_val)
-    Message(FATAL_ERROR "Some tests failed.")
-  endif()
+if (_ctest_test_ret_val)
+  Message(FATAL_ERROR "Some tests failed.")
 endif()

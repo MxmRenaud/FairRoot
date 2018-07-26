@@ -3,7 +3,7 @@
  #    Copyright (C) 2014 GSI Helmholtzzentrum fuer Schwerionenforschung GmbH    #
  #                                                                              #
  #              This software is distributed under the terms of the             #
- #         GNU Lesser General Public Licence version 3 (LGPL) version 3,        #
+ #              GNU Lesser General Public Licence (LGPL) version 3,             #
  #                  copied verbatim in the file "LICENSE"                       #
  ################################################################################
 If(GEANT3_FOUND)
@@ -14,27 +14,18 @@ If(GEANT3_FOUND)
   add_subdirectory(simulation/Tutorial2)
 
   add_subdirectory(simulation/Tutorial4)
-  If(Boost_FOUND AND POS_C++11 AND ZeroMQ_FOUND AND HAS_CXX11_PATTERN1)
-    add_subdirectory(advanced/Tutorial3)
-    add_subdirectory(MQ/7-parameters)
+  If(FairMQ_FOUND)
+    add_subdirectory(MQ/parameters)
     add_subdirectory(MQ/serialization)
-    add_subdirectory(MQ/9-PixelDetector)
-    add_subdirectory(MQ/9a-PixelDetector)
+    add_subdirectory(MQ/pixelDetector)
+    add_subdirectory(MQ/pixelAlternative)
+    add_subdirectory(advanced/Tutorial3)
   EndIf()
   add_subdirectory(simulation/rutherford)
 EndIf()
 
-If(Boost_FOUND AND POS_C++11 AND ZeroMQ_FOUND AND HAS_CXX11_PATTERN1)
-  add_subdirectory(MQ/1-sampler-sink)
-  add_subdirectory(MQ/2-sampler-processor-sink)
-  add_subdirectory(MQ/3-dds)
-  add_subdirectory(MQ/4-copypush)
-  add_subdirectory(MQ/5-req-rep)
-  add_subdirectory(MQ/6-multiple-channels)
-  add_subdirectory(MQ/8-multipart)
+If(FairMQ_FOUND)
   add_subdirectory(MQ/Lmd)
-  add_subdirectory(MQ/multiple-transports)
-  add_subdirectory(advanced/Region)
 EndIf()
 
 If(Go_FOUND AND ZeroMQ_FOUND)

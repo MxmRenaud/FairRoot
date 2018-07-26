@@ -2,7 +2,7 @@
  *    Copyright (C) 2014 GSI Helmholtzzentrum fuer Schwerionenforschung GmbH    *
  *                                                                              *
  *              This software is distributed under the terms of the             * 
- *         GNU Lesser General Public Licence version 3 (LGPL) version 3,        *  
+ *              GNU Lesser General Public Licence (LGPL) version 3,             *  
  *                  copied verbatim in the file "LICENSE"                       *
  ********************************************************************************/
 // $Id: g3Config.C,v 1.1.1.1 2005/06/23 07:14:09 dbertini Exp $
@@ -17,13 +17,13 @@ void Config()
   if ( strncmp(gModel->Data(),"TGeo",4) == 0 ) {
      geant3
           = new  TGeant3TGeo("C++ Interface to Geant3");
-      cout << "-I- G3Config: Geant3 with TGeo has been created."
-           << endl;
+      // cout << "-I- G3Config: Geant3 with TGeo has been created."
+      //      << endl;
   }else{
      geant3
           = new  TGeant3("C++ Interface to Geant3");
-      cout << "-I- G3Config: Geant3 native has been created."
-             << endl;
+      // cout << "-I- G3Config: Geant3 native has been created."
+      //        << endl;
   }
   // create Fair Specific Stack
   FairStack *st = new FairStack();

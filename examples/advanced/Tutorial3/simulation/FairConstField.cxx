@@ -2,7 +2,7 @@
  *    Copyright (C) 2014 GSI Helmholtzzentrum fuer Schwerionenforschung GmbH    *
  *                                                                              *
  *              This software is distributed under the terms of the             * 
- *         GNU Lesser General Public Licence version 3 (LGPL) version 3,        *  
+ *              GNU Lesser General Public Licence (LGPL) version 3,             *  
  *                  copied verbatim in the file "LICENSE"                       *
  ********************************************************************************/
 // -------------------------------------------------------------------------
@@ -82,7 +82,7 @@ FairConstField::FairConstField(FairConstPar* fieldPar)
 {
     if (!fieldPar)
     {
-      LOG(WARNING) << "empty parameter container!" << FairLogger::endl;
+      LOG(warn) << "empty parameter container!";
         fType = -1;
     }
     else
@@ -164,31 +164,28 @@ Double_t FairConstField::GetBz(Double_t x, Double_t y, Double_t z)
 // -----   Screen output   -------------------------------------------------
 void FairConstField::Print(Option_t*) const
 {
-    LOG(INFO) << "======================================================" 
-	      << FairLogger::endl;
-    LOG(INFO) << "----  " << fTitle << " : " << fName << FairLogger::endl;
-    LOG(INFO) << "----" << FairLogger::endl;
-    LOG(INFO) << "----  Field type    : constant" << FairLogger::endl;
-    LOG(INFO) << "----" << FairLogger::endl;
-    LOG(INFO) << "----  Field regions : " << FairLogger::endl;
-    LOG(INFO) << "----        x = " << setw(4) << fXmin << " to " << setw(4) 
-	      << fXmax << " cm" << FairLogger::endl;
-    LOG(INFO) << "----        y = " << setw(4) << fYmin << " to " << setw(4) 
-	      << fYmax << " cm" << FairLogger::endl;
-    LOG(INFO) << "----        z = " << setw(4) << fZmin << " to " << setw(4) 
-	      << fZmax << " cm" << FairLogger::endl;
-    LOG(INFO) << "----  B = ( " << setprecision(4) << fBx << ", " << fBy 
-	      << ", " << fBz << " ) kG" << FairLogger::endl;
-    LOG(INFO) << "======================================================" 
-	      << FairLogger::endl;
+    LOG(info) << "======================================================" ;
+    LOG(info) << "----  " << fTitle << " : " << fName;
+    LOG(info) << "----";
+    LOG(info) << "----  Field type    : constant";
+    LOG(info) << "----";
+    LOG(info) << "----  Field regions : ";
+    LOG(info) << "----        x = " << setw(4) << fXmin << " to " << setw(4)
+              << fXmax << " cm";
+    LOG(info) << "----        y = " << setw(4) << fYmin << " to " << setw(4)
+              << fYmax << " cm";
+    LOG(info) << "----        z = " << setw(4) << fZmin << " to " << setw(4)
+              << fZmax << " cm";
+    LOG(info) << "----  B = ( " << setprecision(4) << fBx << ", " << fBy
+              << ", " << fBz << " ) kG";
+    LOG(info) << "======================================================";
 }
 // -------------------------------------------------------------------------
 // ---------   Fill the parameters   --------------------------------------------
 void FairConstField::FillParContainer()
 {
     TString MapName = GetName();
-    //  LOG(INFO) << "FairConstField::FillParContainer() " 
-    //            << FairLogger::endl;
+    //  LOG(info) << "FairConstField::FillParContainer() ";
     FairRun* fRun = FairRun::Instance();
     FairRuntimeDb* rtdb = fRun->GetRuntimeDb();
     //Bool_t kParameterMerged = kTRUE;

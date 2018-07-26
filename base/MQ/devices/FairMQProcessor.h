@@ -2,7 +2,7 @@
  *    Copyright (C) 2014 GSI Helmholtzzentrum fuer Schwerionenforschung GmbH    *
  *                                                                              *
  *              This software is distributed under the terms of the             * 
- *         GNU Lesser General Public Licence version 3 (LGPL) version 3,        *  
+ *              GNU Lesser General Public Licence (LGPL) version 3,             *  
  *                  copied verbatim in the file "LICENSE"                       *
  ********************************************************************************/
 /**
@@ -69,7 +69,7 @@ class FairMQProcessor : public FairMQDevice
 
     virtual void PostRun()
     {
-        LOG(INFO) << "Received " << fReceivedMsgs << " and sent " << fSentMsgs << " messages!";
+        LOG(info) << "Received " << fReceivedMsgs << " and sent " << fSentMsgs << " messages!";
     }
 
   private:

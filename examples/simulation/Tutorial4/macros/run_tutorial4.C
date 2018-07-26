@@ -2,10 +2,10 @@
  *    Copyright (C) 2014 GSI Helmholtzzentrum fuer Schwerionenforschung GmbH    *
  *                                                                              *
  *              This software is distributed under the terms of the             * 
- *         GNU Lesser General Public Licence version 3 (LGPL) version 3,        *  
+ *              GNU Lesser General Public Licence (LGPL) version 3,             *  
  *                  copied verbatim in the file "LICENSE"                       *
  ********************************************************************************/
-void run_tutorial4(Int_t nEvents = 10, TString mcEngine="TGeant3")
+void run_tutorial4(Int_t nEvents = 10, TString mcEngine="TGeant3",  Bool_t isMT=false)
 {
   
   TString dir = getenv("VMCWORKDIR");
@@ -25,6 +25,9 @@ void run_tutorial4(Int_t nEvents = 10, TString mcEngine="TGeant3")
   // Output file name
   TString  outFile     ="testrun_";
   outFile = outFile + mcEngine + ".root";
+
+  TString geoFile ="data/geoFile_" + mcEngine + "_full.root";
+  TString geoFileMisaligned ="data/geoFile_" + mcEngine + "_full_misaligned.root";
 
   TString  parFile     ="testparams_";
   parFile = parFile + mcEngine + ".root";
@@ -56,7 +59,8 @@ void run_tutorial4(Int_t nEvents = 10, TString mcEngine="TGeant3")
   // -----   Create simulation run   ----------------------------------------
   FairRunSim* run = new FairRunSim();
   run->SetName(mcEngine);              // Transport engine
-  run->SetOutputFile(outFile);          // Output file
+  run->SetIsMT(isMT);                  // Multi-threading mode (Geant4 only)
+  run->SetSink(new FairRootFileSink(outFile));          // Output file
   FairRuntimeDb* rtdb = run->GetRuntimeDb();
   // ------------------------------------------------------------------------
   
@@ -71,7 +75,10 @@ void run_tutorial4(Int_t nEvents = 10, TString mcEngine="TGeant3")
 
   FairTutorialDet4* tutdet = new FairTutorialDet4("TUTDET", kTRUE);
   tutdet->SetGeometryFileName("tutorial4.root"); 
-  tutdet->SetModifyGeometry(kTRUE);
+  if ( ! isMT ) {
+    // This mode does not yet work with MT
+    tutdet->SetModifyGeometry(kTRUE);
+  }
   run->AddModule(tutdet);
   // ------------------------------------------------------------------------
 
@@ -128,9 +135,9 @@ void run_tutorial4(Int_t nEvents = 10, TString mcEngine="TGeant3")
 
    
   // -----   Start run   ----------------------------------------------------
-  run->CreateGeometryFile("data/geofile_full_misaligned.root");
+  run->CreateGeometryFile(geoFileMisaligned);
   run->Run(nEvents);
-  run->CreateGeometryFile("data/geofile_full.root");
+  run->CreateGeometryFile(geoFile);
   // ------------------------------------------------------------------------
   
   rtdb->saveOutput();

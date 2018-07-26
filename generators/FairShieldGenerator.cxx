@@ -2,7 +2,7 @@
  *    Copyright (C) 2014 GSI Helmholtzzentrum fuer Schwerionenforschung GmbH    *
  *                                                                              *
  *              This software is distributed under the terms of the             * 
- *         GNU Lesser General Public Licence version 3 (LGPL) version 3,        *  
+ *              GNU Lesser General Public Licence (LGPL) version 3,             *  
  *                  copied verbatim in the file "LICENSE"                       *
  ********************************************************************************/
 // -------------------------------------------------------------------------
@@ -47,20 +47,16 @@ FairShieldGenerator::FairShieldGenerator(const char* fileName)
    fIonMap()
 {
 
-  LOG(INFO) << "FairShieldGenerator: Opening input file " 
-	    << fileName << FairLogger::endl;
+  LOG(info) << "FairShieldGenerator: Opening input file " << fileName;
   fInputFile = new std::ifstream(fFileName);
   if ( ! fInputFile->is_open() ) {
-    LOG(FATAL) << "Cannot open input file." << FairLogger::endl;
+    LOG(fatal) << "Cannot open input file.";
   }
-  LOG(INFO) << "FairShieldGenerator: Looking for ions..." 
-	    << FairLogger::endl;
+  LOG(info) << "FairShieldGenerator: Looking for ions...";
   Int_t nIons = RegisterIons();
-  LOG(INFO) << "FairShieldGenerator: " << nIons << " ions registered."
-	    << FairLogger::endl;
+  LOG(info) << "FairShieldGenerator: " << nIons << " ions registered.";
   CloseInput();
-  LOG(INFO) << "FairShieldGenerator: Reopening input file " 
-	    << fileName << FairLogger::endl;
+  LOG(info) << "FairShieldGenerator: Reopening input file " << fileName;
   fInputFile = new std::ifstream(fFileName);
 }
 // ------------------------------------------------------------------------
@@ -82,8 +78,7 @@ Bool_t FairShieldGenerator::ReadEvent(FairPrimaryGenerator* primGen)
 
   // Check for input file
   if ( ! fInputFile->is_open() ) {
-    LOG(ERROR) << "FairShieldGenerator: Input file not open!" 
-	       << FairLogger::endl;
+    LOG(error) << "FairShieldGenerator: Input file not open!";
     return kFALSE;
   }
 
@@ -106,21 +101,19 @@ Bool_t FairShieldGenerator::ReadEvent(FairPrimaryGenerator* primGen)
   // Read event header line from input file
   *fInputFile >> eventId;
   *fInputFile >> nTracks;
-  if (nTracks < 0 || nTracks > (INT_MAX-1)) LOG(FATAL) << "Error reading the number of events from event header." << FairLogger::endl;
+  if (nTracks < 0 || nTracks > (INT_MAX-1)) LOG(fatal) << "Error reading the number of events from event header.";
   *fInputFile >> pBeam >> b;
 
 
   // If end of input file is reached : close it and abort run
   if ( fInputFile->eof() ) {
-    LOG(INFO) << "FairShieldGenerator: End of input file reached " 
-	      << FairLogger::endl;
+    LOG(info) << "FairShieldGenerator: End of input file reached ";
     CloseInput();
     return kFALSE;
   }
 
-  LOG(INFO) << "FairShieldGenerator: Event " << eventId << ",  pBeam = "
-	    << pBeam << "GeV, b = " << b << " fm, multiplicity " << nTracks
-	    << FairLogger::endl;
+  LOG(info) << "FairShieldGenerator: Event " << eventId << ",  pBeam = "
+	    << pBeam << "GeV, b = " << b << " fm, multiplicity " << nTracks;
 
   // Loop over tracks in the current event
   for (Int_t itrack=0; itrack<nTracks; itrack++) {
@@ -134,9 +127,8 @@ Bool_t FairShieldGenerator::ReadEvent(FairPrimaryGenerator* primGen)
       sprintf(ionName, "Ion_%d_%d", iMass, iCharge);
       TParticlePDG* part = fPDG->GetParticle(ionName);
       if ( ! part ) {
-        LOG(WARNING) << "FairShieldGenerator::ReadEvent: Cannot find "
-		     << ionName << " in database!" 
-		     << FairLogger::endl;
+        LOG(warn) << "FairShieldGenerator::ReadEvent: Cannot find "
+		     << ionName << " in database!";
         continue;
       }
       pdgType = part->PdgCode();
@@ -159,8 +151,7 @@ void FairShieldGenerator::CloseInput()
 {
   if ( fInputFile ) {
     if ( fInputFile->is_open() ) {
-      LOG(INFO) << "FairShieldGenerator: Closing input file "
-		<< fFileName << FairLogger::endl;
+      LOG(info) << "FairShieldGenerator: Closing input file " << fFileName;
       fInputFile->close();
     }
     delete fInputFile;
@@ -184,7 +175,7 @@ Int_t FairShieldGenerator::RegisterIons()
 
     *fInputFile >> eventId;
     *fInputFile >> nTracks;
-    if (nTracks < 0 || nTracks > (INT_MAX-1)) LOG(FATAL) << "Error reading the number of events from event header." << FairLogger::endl;
+    if (nTracks < 0 || nTracks > (INT_MAX-1)) LOG(fatal) << "Error reading the number of events from event header.";
     *fInputFile >> pBeam >> b;
     if ( fInputFile->eof() ) { continue; }
     for (Int_t iTrack=0; iTrack<nTracks; iTrack++) {

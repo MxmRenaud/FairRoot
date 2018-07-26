@@ -2,7 +2,7 @@
  *    Copyright (C) 2014 GSI Helmholtzzentrum fuer Schwerionenforschung GmbH    *
  *                                                                              *
  *              This software is distributed under the terms of the             * 
- *         GNU Lesser General Public Licence version 3 (LGPL) version 3,        *  
+ *              GNU Lesser General Public Licence (LGPL) version 3,             *  
  *                  copied verbatim in the file "LICENSE"                       *
  ********************************************************************************/
 #ifndef FAIRRUNANAPROOF_H
@@ -38,11 +38,11 @@ class FairRunAnaProof : public FairRunAna
     /**
      * Set the output file name for analysis or simulation
     */
-    virtual void    SetOutputFile(const char* fname);
+    //    virtual void    SetOutputFile(const char* fname);
     /**
      * Set the output file for analysis or simulation
     */
-    virtual void    SetOutputFile(TFile* f);
+    //    virtual void    SetOutputFile(TFile* f);
 
     /**Run from event number NStart to event number NStop */
     void        Run(Int_t NStart=0 ,Int_t NStop=0);

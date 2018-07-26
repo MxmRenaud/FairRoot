@@ -2,7 +2,7 @@
  *    Copyright (C) 2014 GSI Helmholtzzentrum fuer Schwerionenforschung GmbH    *
  *                                                                              *
  *              This software is distributed under the terms of the             * 
- *         GNU Lesser General Public Licence version 3 (LGPL) version 3,        *  
+ *              GNU Lesser General Public Licence (LGPL) version 3,             *  
  *                  copied verbatim in the file "LICENSE"                       *
  ********************************************************************************/
 // -------------------------------------------------------------------------
@@ -38,8 +38,7 @@ FairVolume* FairVolumeList::getVolume(TString* name)
 
   TObject* obj = findObject(* name);
   if (obj) { 
-    LOG(INFO) << "FairVolume getVolume " << name->Data() 
-	      << "found" << FairLogger::endl; 
+    LOG(info) << "FairVolume getVolume " << name->Data() << "found";
   }
 
   return static_cast<FairVolume*>(obj);
@@ -83,10 +82,9 @@ void FairVolumeList::addVolume(FairVolume* elem)
   FairVolume* v= static_cast<FairVolume*>(findObject(elem->GetName()));
 
   if (v) {
-    LOG(ERROR) << "FairVolumeList element: " << elem->GetName() 
-	       << " VolId : " << elem->getVolumeId() 
-	       << " already defined " << v->getVolumeId() 
-	       << FairLogger::endl; 
+    LOG(error) << "FairVolumeList element: " << elem->GetName()
+	       << " VolId : " << elem->getVolumeId()
+	       << " already defined " << v->getVolumeId();
   } else {
     fData->Add(elem);
   }

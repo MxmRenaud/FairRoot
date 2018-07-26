@@ -2,7 +2,7 @@
  #    Copyright (C) 2014 GSI Helmholtzzentrum fuer Schwerionenforschung GmbH    #
  #                                                                              #
  #              This software is distributed under the terms of the             # 
- #         GNU Lesser General Public Licence version 3 (LGPL) version 3,        #  
+ #              GNU Lesser General Public Licence (LGPL) version 3,             #  
  #                  copied verbatim in the file "LICENSE"                       #
  ################################################################################
 # - Find ROOT instalation
@@ -44,22 +44,16 @@
 
 Message(STATUS "Looking for Root...")
 
-Set(ROOT_CONFIG_SEARCHPATH
-  ${ROOT_DIR}/bin
-  ${SIMPATH}/bin
-  ${SIMPATH}/tools/root/bin
-  $ENV{ROOTSYS}/bin
-)
-
 Set(ROOT_FOUND FALSE)
 Set(ROOT_DEFINITIONS "")
 Set(ROOT_INSTALLED_VERSION_TOO_OLD FALSE)
 Set(ROOT_CONFIG_EXECUTABLE ROOT_CONFIG_EXECUTABLE-NOTFOUND)
 
 Find_Program(ROOT_CONFIG_EXECUTABLE NAMES root-config 
-             PATHS ${ROOT_CONFIG_SEARCHPATH}
-             NO_DEFAULT_PATH
-            )
+  HINTS ${ROOT_DIR} ${SIMPATH} ${ROOTSYS} $ENV{ROOTSYS}
+  PATH_SUFFIXES bin tools/root/bin
+  NO_DEFAULT_PATH
+)
      
 If(ROOT_CONFIG_EXECUTABLE)
    

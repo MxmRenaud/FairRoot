@@ -2,7 +2,7 @@
  *    Copyright (C) 2014 GSI Helmholtzzentrum fuer Schwerionenforschung GmbH    *
  *                                                                              *
  *              This software is distributed under the terms of the             * 
- *         GNU Lesser General Public Licence version 3 (LGPL) version 3,        *  
+ *              GNU Lesser General Public Licence (LGPL) version 3,             *  
  *                  copied verbatim in the file "LICENSE"                       *
  ********************************************************************************/
 // ********************************************* //
@@ -35,7 +35,7 @@ ClassImp(FairTrajFilter)
 
 
 
-FairTrajFilter* FairTrajFilter::fgInstance = NULL;
+TMCThreadLocal FairTrajFilter* FairTrajFilter::fgInstance = NULL;
 
 FairTrajFilter* FairTrajFilter::Instance()
 {
@@ -94,8 +94,7 @@ FairTrajFilter::~FairTrajFilter()
 void FairTrajFilter::Init(TString brName, TString folderName)
 {
 
-  FairRootManager::Instance()->Register(brName.Data(), folderName.Data(), fTrackCollection, kTRUE);
-
+  FairRootManager::Instance()->RegisterAny(brName, fTrackCollection, kTRUE);
 }
 
 void FairTrajFilter::Reset()

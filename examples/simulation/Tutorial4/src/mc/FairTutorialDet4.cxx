@@ -2,7 +2,7 @@
  *    Copyright (C) 2014 GSI Helmholtzzentrum fuer Schwerionenforschung GmbH    *
  *                                                                              *
  *              This software is distributed under the terms of the             * 
- *         GNU Lesser General Public Licence version 3 (LGPL) version 3,        *  
+ *              GNU Lesser General Public Licence (LGPL) version 3,             *  
  *                  copied verbatim in the file "LICENSE"                       *
  ********************************************************************************/
 #include "FairTutorialDet4.h"
@@ -36,6 +36,8 @@
 #include "TVirtualMCStack.h"            // for TVirtualMCStack
 
 #include <stdio.h>                      // for NULL, printf
+
+FairTutorialDet4Geo* FairTutorialDet4::fgGeo;   //!
 
 FairTutorialDet4::FairTutorialDet4()
   : FairDetector("TutorialDet", kTRUE, kTutDet),
@@ -85,24 +87,48 @@ FairTutorialDet4::FairTutorialDet4(const char* name, Bool_t active)
 {
 }
 
+FairTutorialDet4::FairTutorialDet4(const FairTutorialDet4& rhs)
+  : FairDetector(rhs),
+    fTrackID(-1),
+    fVolumeID(-1),
+    fPos(),
+    fMom(),
+    fTime(-1.),
+    fLength(-1.),
+    fELoss(-1),
+    fFairTutorialDet4PointCollection(new TClonesArray("FairTutorialDet4Point")),
+    fGeoHandler(new FairTutorialDet4GeoHandler()),
+    fMisalignPar(NULL),
+    fNrOfDetectors(-1),
+    fShiftX(),
+    fShiftY(),
+    fShiftZ(),
+    fRotX(),
+    fRotY(),
+    fRotZ(),
+    fModifyGeometry(kFALSE),
+    fGlobalCoordinates(kFALSE)
+{
+}
+
 FairTutorialDet4::~FairTutorialDet4()
 {
-  LOG(DEBUG4)<<"Entering Destructor of FairTutorialDet4"<<FairLogger::endl;
+  LOG(debug4)<<"Entering Destructor of FairTutorialDet4";
   if (fFairTutorialDet4PointCollection) {
     fFairTutorialDet4PointCollection->Delete();
     delete fFairTutorialDet4PointCollection;
   }
-  LOG(DEBUG4)<<"Leaving Destructor of FairTutorialDet4"<<FairLogger::endl;
+  LOG(debug4)<<"Leaving Destructor of FairTutorialDet4";
 }
 void FairTutorialDet4::SetParContainers()
 {
 
-  LOG(INFO)<< "Set tutdet missallign parameters"<<FairLogger::endl;
+  LOG(info)<< "Set tutdet missallign parameters";
   // Get Base Container
   FairRun* sim = FairRun::Instance();
-  LOG_IF(FATAL, !sim) << "No run object"<<FairLogger::endl;
+  LOG_IF(FATAL, !sim) << "No run object";
   FairRuntimeDb* rtdb=sim->GetRuntimeDb();
-  LOG_IF(FATAL, !rtdb) << "No runtime database"<<FairLogger::endl;
+  LOG_IF(FATAL, !rtdb) << "No runtime database";
 
   fMisalignPar = static_cast<FairTutorialDet4MisalignPar*>
                  (rtdb->getContainer("FairTutorialDet4MissallignPar"));
@@ -111,15 +137,21 @@ void FairTutorialDet4::SetParContainers()
 
 void FairTutorialDet4::Initialize()
 {
+  // Initialize sensitive volume if geometry is build from ASCII file
+  TString fileName=GetGeometryFileName();
+  if (fileName.EndsWith(".geo")) {
+    SetSensitiveVolumes();
+  }
+
   FairDetector::Initialize();
   FairRuntimeDb* rtdb= FairRun::Instance()->GetRuntimeDb();
   FairTutorialDet4GeoPar* par=static_cast<FairTutorialDet4GeoPar*>(rtdb->getContainer("FairTutorialDet4GeoPar"));
 
   if (fModifyGeometry) {
     if (fGlobalCoordinates) {
-      LOG(WARNING) << "Storing MCPoints in global coordinates and modifying the geometry was set." << FairLogger::endl;
-      LOG(WARNING) << "When modifying the geometry is set the MCPoints has to be stored in local coordinates." << FairLogger::endl;
-      LOG(WARNING) << "Store MCPoints in local coordinate system." << FairLogger::endl;
+      LOG(warn) << "Storing MCPoints in global coordinates and modifying the geometry was set.";
+      LOG(warn) << "When modifying the geometry is set the MCPoints has to be stored in local coordinates.";
+      LOG(warn) << "Store MCPoints in local coordinate system.";
       fGlobalCoordinates=kFALSE;
     }
   }
@@ -134,7 +166,7 @@ void FairTutorialDet4::Initialize()
 
 void FairTutorialDet4::InitParContainers()
 {
-  LOG(INFO)<< "Initialize tutdet missallign parameters"<<FairLogger::endl;
+  LOG(info)<< "Initialize tutdet missallign parameters";
   fNrOfDetectors=fMisalignPar->GetNrOfDetectors();
   fShiftX=fMisalignPar->GetShiftX();
   fShiftY=fMisalignPar->GetShiftY();
@@ -213,9 +245,13 @@ void FairTutorialDet4::Register()
       only during the simulation.
   */
 
-  FairRootManager::Instance()->Register("TutorialDetPoint", "TutorialDet",
-                                        fFairTutorialDet4PointCollection, kTRUE);
-
+  if ( ! gMC->IsMT() ) {
+    FairRootManager::Instance()->Register("TutorialDetPoint", "TutorialDet",
+                                          fFairTutorialDet4PointCollection, kTRUE);
+  } else {
+    FairRootManager::Instance()->RegisterAny("TutorialDetPoint",
+                                             fFairTutorialDet4PointCollection, kTRUE);
+  }
 }
 
 
@@ -234,13 +270,13 @@ void FairTutorialDet4::ConstructGeometry()
 {
   TString fileName=GetGeometryFileName();
   if (fileName.EndsWith(".geo")) {
-    LOG(INFO)<<"Constructing Tutorial4 geometry from ASCII file "<<fileName<<FairLogger::endl;
+    LOG(info)<<"Constructing Tutorial4 geometry from ASCII file "<<fileName;
     ConstructASCIIGeometry();
   } else if (fileName.EndsWith(".root")) {
-    LOG(INFO)<<"Constructing Tutorial4 geometry from ROOT file "<<fileName<<FairLogger::endl;
+    LOG(info)<<"Constructing Tutorial4 geometry from ROOT file "<<fileName;
     ConstructRootGeometry();
   } else {
-    LOG(FATAL) << "Geometry format not supported." << FairLogger::endl;
+    LOG(fatal) << "Geometry format not supported.";
   }
 }
 
@@ -261,38 +297,13 @@ void FairTutorialDet4::ConstructASCIIGeometry()
 
   FairGeoLoader*    geoLoad = FairGeoLoader::Instance();
   FairGeoInterface* geoFace = geoLoad->getGeoInterface();
-  FairTutorialDet4Geo*  Geo  = new FairTutorialDet4Geo();
-  LOG(DEBUG)<<"Read Geo file "<<GetGeometryFileName()<<FairLogger::endl;
-  Geo->setGeomFile(GetGeometryFileName());
-  geoFace->addGeoModule(Geo);
+  fgGeo  = new FairTutorialDet4Geo();
+  LOG(debug)<<"Read Geo file "<<GetGeometryFileName();
+  fgGeo->setGeomFile(GetGeometryFileName());
+  geoFace->addGeoModule(fgGeo);
 
-  Bool_t rc = geoFace->readSet(Geo);
-  if (rc) { Geo->create(geoLoad->getGeoBuilder()); }
-  TList* volList = Geo->getListOfVolumes();
-
-  // store geo parameter
-  FairRun* fRun = FairRun::Instance();
-  FairRuntimeDb* rtdb= FairRun::Instance()->GetRuntimeDb();
-  FairTutorialDet4GeoPar* par=static_cast<FairTutorialDet4GeoPar*>(rtdb->getContainer("FairTutorialDet4GeoPar"));
-  TObjArray* fSensNodes = par->GetGeoSensitiveNodes();
-  TObjArray* fPassNodes = par->GetGeoPassiveNodes();
-
-  TListIter iter(volList);
-  FairGeoNode* node   = NULL;
-  FairGeoVolume* aVol=NULL;
-
-  while( (node = static_cast<FairGeoNode*>(iter.Next())) ) {
-    aVol = dynamic_cast<FairGeoVolume*> ( node );
-    if ( node->isSensitive()  ) {
-      fSensNodes->AddLast( aVol );
-    } else {
-      fPassNodes->AddLast( aVol );
-    }
-  }
-  par->setChanged();
-  par->setInputVersion(fRun->GetRunId(),1);
-
-  ProcessNodes ( volList );
+  Bool_t rc = geoFace->readSet(fgGeo);
+  if (rc) { fgGeo->create(geoLoad->getGeoBuilder()); }
 }
 
 void FairTutorialDet4::ModifyGeometry()
@@ -303,18 +314,18 @@ void FairTutorialDet4::ModifyGeometry()
   // The code is here to demonstrate how to use this feature.
 
   if (fModifyGeometry) {
-    LOG(INFO)<<"Misalign the geometry for the tutorial detector."<<FairLogger::endl;
+    LOG(info)<<"Misalign the geometry for the tutorial detector.";
 
     TString detStr   = "Tutorial4/det00";
 
     TGeoPNEntry* entry = gGeoManager->GetAlignableEntry(detStr.Data());
     if (entry) {
-      LOG(INFO)<<"Misalign using symlinks."<<FairLogger::endl;
+      LOG(info)<<"Misalign using symlinks.";
 //      TGeoPhysicalNode* node = entry->GetPhysicalNode();
-//    LOG(INFO)<<"Nr of alignable objects: "<<gGeoManager->GetNAlignable()<<FairLogger::endl;
+//    LOG(info)<<"Nr of alignable objects: "<<gGeoManager->GetNAlignable();
       ModifyGeometryBySymlink();
     } else {
-      LOG(INFO)<<"Misalign using full path."<<FairLogger::endl;
+      LOG(info)<<"Misalign using full path.";
       ModifyGeometryByFullPath();
     }
   }
@@ -327,11 +338,11 @@ void FairTutorialDet4::ModifyGeometryByFullPath()
   TString volStr   = "/cave_1/tutorial4_0/tut4_det_";
 
   for (Int_t iDet = 0; iDet < fNrOfDetectors; ++iDet) {
-    LOG(DEBUG)<<"Misalign detector nr "<<iDet<<FairLogger::endl;
+    LOG(debug)<<"Misalign detector nr "<<iDet;
     volPath  = volStr;
     volPath += iDet;
 
-    LOG(DEBUG) << "Path: "<< volPath << FairLogger::endl;
+    LOG(debug) << "Path: "<< volPath;
     gGeoManager->cd(volPath);
 //    TGeoHMatrix* g3 = gGeoManager->GetCurrentMatrix();
 //      g3->Print();
@@ -358,12 +369,12 @@ void FairTutorialDet4::ModifyGeometryByFullPath()
     pn3->Align(nl3);
 
 //    TGeoHMatrix* ng3 = pn3->GetMatrix(); //"real" global matrix, what survey sees
-//    LOG(DEBUG)<<"*************  The Misaligned Matrix in GRS **************"<<FairLogger::endl;
+//    LOG(debug)<<"*************  The Misaligned Matrix in GRS **************";
 //      ng3->Print();
 
 
   }
-  LOG(DEBUG)<<"Align in total "<<fNrOfDetectors<<" detectors."<<FairLogger::endl;
+  LOG(debug)<<"Align in total "<<fNrOfDetectors<<" detectors.";
 
 }
 
@@ -373,7 +384,7 @@ void FairTutorialDet4::ModifyGeometryBySymlink()
   TString detStr   = "Tutorial4/det";
 
   for (Int_t iDet = 0; iDet < fNrOfDetectors; ++iDet) {
-    LOG(INFO)<<"Misalign detector nr "<<iDet<<FairLogger::endl;
+    LOG(info)<<"Misalign detector nr "<<iDet;
 
     symName  = detStr;
     symName += Form("%02d",iDet);
@@ -398,7 +409,7 @@ void FairTutorialDet4::ModifyGeometryBySymlink()
     Double_t dphi   = fRotX[iDet];
     Double_t dtheta = fRotY[iDet];
     Double_t dpsi   = fRotZ[iDet];
-    LOG(INFO)<<"Psi: "<<dpsi<<FairLogger::endl;
+    LOG(info)<<"Psi: "<<dpsi;
 
     TGeoRotation* rrot = new TGeoRotation("rot",dphi,dtheta,dpsi);
     TGeoCombiTrans localdelta = *(new TGeoCombiTrans(dx,dy,dz, rrot));
@@ -415,7 +426,7 @@ void FairTutorialDet4::ModifyGeometryBySymlink()
 
   }
   //do something
-  LOG(INFO)<<"Total Nr of detectors: "<<fNrOfDetectors<<FairLogger::endl;
+  LOG(info)<<"Total Nr of detectors: "<<fNrOfDetectors;
 
 
 
@@ -433,7 +444,38 @@ FairTutorialDet4Point* FairTutorialDet4::AddHit(Int_t trackID, Int_t detID,
          time, length, eLoss);
 }
 
+FairModule* FairTutorialDet4::CloneModule() const
+{
+  return new FairTutorialDet4(*this);
+}
 
+void FairTutorialDet4::SetSensitiveVolumes()
+{
+  TList* volList = fgGeo->getListOfVolumes();
 
+  // store geo parameter
+  FairRun* fRun = FairRun::Instance();
+  FairRuntimeDb* rtdb= FairRun::Instance()->GetRuntimeDb();
+  FairTutorialDet4GeoPar* par=static_cast<FairTutorialDet4GeoPar*>(rtdb->getContainer("FairTutorialDet4GeoPar"));
+  TObjArray* fSensNodes = par->GetGeoSensitiveNodes();
+  TObjArray* fPassNodes = par->GetGeoPassiveNodes();
+
+  TListIter iter(volList);
+  FairGeoNode* node   = NULL;
+  FairGeoVolume* aVol=NULL;
+
+  while( (node = static_cast<FairGeoNode*>(iter.Next())) ) {
+    aVol = dynamic_cast<FairGeoVolume*> ( node );
+    if ( node->isSensitive()  ) {
+      fSensNodes->AddLast( aVol );
+    } else {
+      fPassNodes->AddLast( aVol );
+    }
+  }
+  par->setChanged();
+  par->setInputVersion(fRun->GetRunId(),1);
+
+  ProcessNodes ( volList );
+}
 
 ClassImp(FairTutorialDet4)

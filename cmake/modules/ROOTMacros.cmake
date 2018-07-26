@@ -2,7 +2,7 @@
  #    Copyright (C) 2014 GSI Helmholtzzentrum fuer Schwerionenforschung GmbH    #
  #                                                                              #
  #              This software is distributed under the terms of the             #
- #         GNU Lesser General Public Licence version 3 (LGPL) version 3,        #
+ #              GNU Lesser General Public Licence (LGPL) version 3,             #
  #                  copied verbatim in the file "LICENSE"                       #
  ################################################################################
 Function(Format _output input prefix suffix)
@@ -99,7 +99,7 @@ Macro(ROOT_GENERATE_DICTIONARY_NEW)
     Set(Int_PCMFILE G__${Int_LIB}Dict_rdict.pcm)
     Set(OUTPUT_FILES ${OUTPUT_FILES} ${Int_PCMFILE} ${Int_ROOTMAPFILE})
     Set(EXTRA_DICT_PARAMETERS ${EXTRA_DICT_PARAMETERS}
-        -inlineInputHeader -rmf ${Int_ROOTMAPFILE} 
+         -rmf ${Int_ROOTMAPFILE}
         -rml ${Int_LIB}${CMAKE_SHARED_LIBRARY_SUFFIX})
     Set_Source_Files_Properties(${OUTPUT_FILES} PROPERTIES GENERATED TRUE)
     String(REPLACE ";" " " EXTRA_DICT_PARAMETERS_STR "${EXTRA_DICT_PARAMETERS}")

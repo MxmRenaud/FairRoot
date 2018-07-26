@@ -2,7 +2,7 @@
  *    Copyright (C) 2014 GSI Helmholtzzentrum fuer Schwerionenforschung GmbH    *
  *                                                                              *
  *              This software is distributed under the terms of the             *
- *         GNU Lesser General Public Licence version 3 (LGPL) version 3,        *
+ *              GNU Lesser General Public Licence (LGPL) version 3,             *
  *                  copied verbatim in the file "LICENSE"                       *
  ********************************************************************************/
 #include "FairRunInfo.h"
@@ -78,12 +78,9 @@ void FairRunInfo::CalculateTimeDifference()
 void FairRunInfo::PrintInfo()
 {
 
-  LOG(DEBUG) << "Time to execute 1 event: " << fTimeDiff.back() << "s" 
-             << FairLogger::endl;
-  LOG(DEBUG) << "Used resident memory: " << fResidentMemory.back() 
-             << " MB" << FairLogger::endl;
-  LOG(DEBUG) << "Used virtual memory: " << fVirtualMemory.back()
-             << " MB" << FairLogger::endl;
+  LOG(debug) << "Time to execute 1 event: " << fTimeDiff.back() << "s";
+  LOG(debug) << "Used resident memory: " << fResidentMemory.back() << " MB";
+  LOG(debug) << "Used virtual memory: " << fVirtualMemory.back() << " MB";
 }
 //_____________________________________________________________________________
 void FairRunInfo::WriteInfo()
@@ -158,7 +155,7 @@ void FairRunInfo::WriteHistosToFile(TList* histoList)
   TFile* oldfile = gFile;
 
   TString directory = gFile->GetName();
-  LOG(DEBUG) << "Name: " << gFile->GetName() << FairLogger::endl;
+  LOG(debug) << "Name: " << gFile->GetName();
   Ssiz_t posLastSlash = directory.Last('/');
   directory.Remove(posLastSlash+1, directory.Length()-posLastSlash-1);
   TString filename = "";
@@ -168,11 +165,11 @@ void FairRunInfo::WriteHistosToFile(TList* histoList)
 
 
   directory = gFile->GetName();
-  LOG(DEBUG) << "Name: " << directory.Data() << FairLogger::endl;
+  LOG(debug) << "Name: " << directory.Data();
   posLastSlash = directory.Last('/');
   directory.Remove(0, posLastSlash+1);
   directory.ReplaceAll(".root","");
-  LOG(DEBUG) << "Name: " << directory.Data() << FairLogger::endl;
+  LOG(debug) << "Name: " << directory.Data();
 
 
 
@@ -180,7 +177,7 @@ void FairRunInfo::WriteHistosToFile(TList* histoList)
   filename += "FairRunInfo_";
   filename += directory;
   filename += ".root";
-  LOG(DEBUG) << "Filename: " << filename.Data() << FairLogger::endl;
+  LOG(debug) << "Filename: " << filename.Data();
 
   TFile* f1 = TFile::Open(filename, "recreate");
   f1->cd();
