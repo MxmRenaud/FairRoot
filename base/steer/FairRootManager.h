@@ -247,6 +247,8 @@ class FairRootManager : public TObject
 
     static char* GetTreeName();
 
+    static char* GetFolderName();
+
     /**public Members for multi-threading */
     Int_t  GetInstanceId() const { return fId; }
     void   UpdateFileName(TString& fileName);
@@ -254,6 +256,8 @@ class FairRootManager : public TObject
     // vvvvvvvvvv depracted functions, replaced by FairSink vvvvvvvvvv
     /** Return a pointer to the output File of type TFile */
     TFile* GetOutFile();
+    /** Return a pointer to the output tree of type TTree */
+    TTree* GetOutTree();
     // ^^^^^^^^^^ depracted functions, replaced by FairSink ^^^^^^^^^^
   private:
 
