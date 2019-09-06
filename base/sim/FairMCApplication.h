@@ -44,6 +44,9 @@ class TObjArray;
 class TRefArray;
 class TTask;
 class TVirtualMC;
+
+enum class FairMCApplicationState {kUnknownState, kConstructGeometry, kInitGeometry};
+
 /**
  * The Main Application ( Interface to MonteCarlo application )
  * @author M. Al-Turany, D. Bertini
@@ -86,6 +89,8 @@ class FairMCApplication : public TVirtualMCApplication
     virtual void          BeginPrimary();                                   // MC Application
     /** Construct user geometry */
     virtual void          ConstructGeometry();                              // MC Application
+    /** Align or misalign geometry before actual run       */
+    virtual Bool_t        MisalignGeometry();
     /** Define parameters for optical processes (optional) */
     virtual void          ConstructOpGeometry();                            // MC Application
     /** Define actions at the end of event */
@@ -194,6 +199,11 @@ class FairMCApplication : public TVirtualMCApplication
     */
     void                  SetSaveCurrentEvent(Bool_t set) {fSaveCurrentEvent=set;}
 
+    /**
+     * Get the current application state.
+     */
+    FairMCApplicationState GetState() const { return fState; }
+
   private:
     // methods
     Int_t GetIonPdg(Int_t z, Int_t a) const;
@@ -283,7 +293,10 @@ class FairMCApplication : public TVirtualMCApplication
 
     /** Flag if the current event should be saved */
     Bool_t fSaveCurrentEvent;
-    
+
+    /** Current state */
+    FairMCApplicationState fState; //!
+
     ClassDef(FairMCApplication,4)  //Interface to MonteCarlo application
 
   private:

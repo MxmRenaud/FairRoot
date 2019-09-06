@@ -14,6 +14,7 @@
 #include "TMCtls.h"                     // for multi-threading
 
 #include "FairRootManager.h"
+#include "FairAlignmentHandler.h"
 
 class FairEventHeader;
 class FairFileHeader;
@@ -32,6 +33,7 @@ class FairField;
 
 class FairRun : public TNamed
 {
+  friend class FairMCApplication;
   public:
     /**
      * default ctor
@@ -184,6 +186,10 @@ class FairRun : public TNamed
     void SetUserOutputFileName(const TString& name);
     TString GetUserOutputFileName() const;
 
+    void AddAlignmentMatrices(
+        const std::map<std::string, TGeoHMatrix>& alignmentMatrices,
+        bool invertMatrices = false);
+
   private:
     FairRun(const FairRun& M);
     FairRun& operator= (const  FairRun&) {
@@ -222,6 +228,10 @@ class FairRun : public TNamed
 
     Bool_t                   fMarkFill; //!
 
-    ClassDef(FairRun ,4)
+    FairAlignmentHandler fAlignmentHandler;
+
+    void AlignGeometry() const;
+
+    ClassDef(FairRun ,5)
 };
 #endif //FAIRRUN_H

@@ -6,28 +6,17 @@
  *                  copied verbatim in the file "LICENSE"                       *
  ********************************************************************************/
 
-// special class to expose protected TMessage constructor
-class PixelTMessage2 : public TMessage
-{
-  public:
-    PixelTMessage2(void* buf, Int_t len)
-        : TMessage(buf, len)
-    {
-        ResetBit(kIsOwner);
-    }
-};
-
 template <typename T>
 FairMQPixelTaskProcessorBin<T>::FairMQPixelTaskProcessorBin()
     : fInputChannelName("data-in")
     , fOutputChannelName("data-out")
     , fParamChannelName("param")
-    , fStaticParameters(false)
     , fEventHeader(nullptr)
     , fInput(nullptr)
     , fOutput(nullptr)
     , fInputArray(nullptr)
     , fOutputArray(nullptr)
+    , fStaticParameters(false)
     , fNewRunId(1)
     , fCurrentRunId(-1)
     , fDataToKeep("")
@@ -229,9 +218,9 @@ FairParGenericSet* FairMQPixelTaskProcessorBin<T>::UpdateParameter(FairParGeneri
     {
         if (Receive(rep,fParamChannelName) > 0)
         {
-            PixelTMessage2 tm(rep->GetData(), rep->GetSize());
-            thisPar = (FairParGenericSet*)tm.ReadObject(tm.GetClass());
-            LOG(warn) << "Received parameter"<< paramName <<" from the server (" << thisPar << ")";
+            thisPar = nullptr;
+            Deserialize<RootSerializer>(*rep,thisPar);
+            LOG(info) << "Received parameter"<< paramName <<" from the server (" << thisPar << ")";
             return thisPar;
         }
     }

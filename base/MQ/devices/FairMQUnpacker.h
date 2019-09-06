@@ -16,7 +16,6 @@
 #define FAIRMQUNPACKER_H
 
 #include "FairMQDevice.h"
-#include <options/FairMQProgOptions.h>
 #include "RootSerializer.h"
 
 #include <stdexcept>
@@ -109,7 +108,7 @@ class FairMQUnpacker : public FairMQDevice
 
     void Run()
     {
-        const FairMQChannel& inputChannel = fChannels.at(fInputChannelName).at(0);
+        FairMQChannel& inputChannel = fChannels.at(fInputChannelName).at(0);
 
         while (CheckCurrentState(RUNNING))
         {

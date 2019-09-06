@@ -2,13 +2,14 @@
  #    Copyright (C) 2014 GSI Helmholtzzentrum fuer Schwerionenforschung GmbH    #
  #                                                                              #
  #              This software is distributed under the terms of the             #
- #              GNU Lesser General Public Licence (LGPL) version 3,             #  
+ #              GNU Lesser General Public Licence (LGPL) version 3,             #
  #                  copied verbatim in the file "LICENSE"                       #
  ################################################################################
 # Create a library called "libBase" which includes the source files given in
 # the array .
 # The extension is already found.  Any number of sources could be listed here.
 
+add_subdirectory (sim/fastsim)
 
 If(NOT DEFINED BUILD_MBS)
   Set(BUILD_MBS TRUE)
@@ -26,6 +27,7 @@ Set(INCLUDE_DIRECTORIES
   ${CMAKE_SOURCE_DIR}/base/sim
   ${CMAKE_SOURCE_DIR}/base/source
   ${CMAKE_SOURCE_DIR}/base/sink
+  ${CMAKE_SOURCE_DIR}/alignment
   ${FairLogger_INCDIR}
 )
 
@@ -99,6 +101,7 @@ sim/FairModule.cxx
 sim/FairParticle.cxx
 sim/FairPrimaryGenerator.cxx
 sim/FairRunIdGenerator.cxx
+sim/FairGenericVMCConfig.cxx
 sim/FairVolume.cxx
 sim/FairVolumeList.cxx
 
@@ -154,7 +157,7 @@ If(BUILD_MBS)
   )
 
   Set(DEPENDENCIES
-      ParBase GeoBase FairTools MbsAPI
+      Alignment ParBase GeoBase FairTools MbsAPI
       Proof GeomPainter Geom VMC EG MathCore Physics
       Matrix Tree Hist RIO RHTTP Core
   )
@@ -162,7 +165,7 @@ If(BUILD_MBS)
   Set(DEFINITIONS BUILD_MBS)
 Else(BUILD_MBS)
   Set(DEPENDENCIES
-      ParBase GeoBase FairTools
+      Alignment ParBase GeoBase FairTools
       Proof GeomPainter Geom VMC EG MathCore Physics
       Matrix Tree Hist RIO RHTTP Core
   )
@@ -173,7 +176,7 @@ EXEC_PROGRAM( ${ROOT_CONFIG_EXECUTABLE}
     OUTPUT_VARIABLE ROOT_HAS_GDML )
 
 If ( ${ROOT_HAS_GDML} STREQUAL yes )
-  Message(STATUS "Build CbmModule with Gdml support")
+  Message(STATUS "Build FairModule with Gdml support")
   Add_Definitions(-DROOT_HAS_GDML)
 EndIf ( ${ROOT_HAS_GDML} STREQUAL yes )
 

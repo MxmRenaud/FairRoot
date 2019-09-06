@@ -204,4 +204,15 @@ TString FairRun::GetUserOutputFileName() const
 }
 //_____________________________________________________________________________
 
+
+void FairRun::AlignGeometry() const {
+  fAlignmentHandler.AlignGeometry();
+}
+
+void FairRun::AddAlignmentMatrices(
+    const std::map<std::string, TGeoHMatrix>& alignmentMatrices,
+    bool invertMatrices) {
+  fAlignmentHandler.AddAlignmentMatrices(alignmentMatrices, invertMatrices);
+}
+
 ClassImp(FairRun)

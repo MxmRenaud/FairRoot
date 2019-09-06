@@ -137,12 +137,6 @@ void FairTutorialDet4::SetParContainers()
 
 void FairTutorialDet4::Initialize()
 {
-  // Initialize sensitive volume if geometry is build from ASCII file
-  TString fileName=GetGeometryFileName();
-  if (fileName.EndsWith(".geo")) {
-    SetSensitiveVolumes();
-  }
-
   FairDetector::Initialize();
   FairRuntimeDb* rtdb= FairRun::Instance()->GetRuntimeDb();
   FairTutorialDet4GeoPar* par=static_cast<FairTutorialDet4GeoPar*>(rtdb->getContainer("FairTutorialDet4GeoPar"));
@@ -234,8 +228,6 @@ void FairTutorialDet4::EndOfEvent()
 
 }
 
-
-
 void FairTutorialDet4::Register()
 {
 
@@ -295,60 +287,22 @@ void FairTutorialDet4::ConstructASCIIGeometry()
       just copy this and use it for your detector, otherwise you can
       implement here you own way of constructing the geometry. */
 
-  FairGeoLoader*    geoLoad = FairGeoLoader::Instance();
-  FairGeoInterface* geoFace = geoLoad->getGeoInterface();
-  fgGeo  = new FairTutorialDet4Geo();
-  LOG(debug)<<"Read Geo file "<<GetGeometryFileName();
-  fgGeo->setGeomFile(GetGeometryFileName());
-  geoFace->addGeoModule(fgGeo);
-
-  Bool_t rc = geoFace->readSet(fgGeo);
-  if (rc) { fgGeo->create(geoLoad->getGeoBuilder()); }
+    FairModule::ConstructASCIIGeometry<FairTutorialDet4Geo, FairTutorialDet4GeoPar>(fgGeo, "FairTutorialDet4GeoPar");
 }
 
-void FairTutorialDet4::ModifyGeometry()
-{
-  // When saving the top volume of the geometry to a file the information
-  // about the TGeoPNEntries is not saved. So the misalign procedure
-  // which uses the TGeoPNEntry information can not be used.
-  // The code is here to demonstrate how to use this feature.
-
-  if (fModifyGeometry) {
-    LOG(info)<<"Misalign the geometry for the tutorial detector.";
-
-    TString detStr   = "Tutorial4/det00";
-
-    TGeoPNEntry* entry = gGeoManager->GetAlignableEntry(detStr.Data());
-    if (entry) {
-      LOG(info)<<"Misalign using symlinks.";
-//      TGeoPhysicalNode* node = entry->GetPhysicalNode();
-//    LOG(info)<<"Nr of alignable objects: "<<gGeoManager->GetNAlignable();
-      ModifyGeometryBySymlink();
-    } else {
-      LOG(info)<<"Misalign using full path.";
-      ModifyGeometryByFullPath();
-    }
-  }
-}
-
-void FairTutorialDet4::ModifyGeometryByFullPath()
-{
+std::map<std::string, TGeoHMatrix> FairTutorialDet4::getMisalignmentMatrices(){
 
   TString volPath;
   TString volStr   = "/cave_1/tutorial4_0/tut4_det_";
 
+  std::map<std::string, TGeoHMatrix> matrices;
+
   for (Int_t iDet = 0; iDet < fNrOfDetectors; ++iDet) {
-    LOG(debug)<<"Misalign detector nr "<<iDet;
+    LOG(debug)<<"Create Matrix for detector nr "<<iDet;
     volPath  = volStr;
     volPath += iDet;
 
     LOG(debug) << "Path: "<< volPath;
-    gGeoManager->cd(volPath);
-//    TGeoHMatrix* g3 = gGeoManager->GetCurrentMatrix();
-//      g3->Print();
-    TGeoNode* n3 = gGeoManager->GetCurrentNode();
-    TGeoMatrix* l3 = n3->GetMatrix();
-//      l3->Print();
 
     //we have to express the displacements as regards the old local RS (non misaligned BTOF)
     Double_t dx     = fShiftX[iDet];
@@ -360,79 +314,56 @@ void FairTutorialDet4::ModifyGeometryByFullPath()
 
     TGeoRotation* rrot = new TGeoRotation("rot",dphi,dtheta,dpsi);
     TGeoCombiTrans localdelta = *(new TGeoCombiTrans(dx,dy,dz, rrot));
-//      localdelta.Print();
-    TGeoHMatrix nlocal = *l3 * localdelta;
-    TGeoHMatrix* nl3 = new TGeoHMatrix(nlocal); // new matrix, representing real position (from new local mis RS to the global one)
+    TGeoHMatrix ldm = TGeoHMatrix(localdelta);
 
-    TGeoPhysicalNode* pn3 = gGeoManager->MakePhysicalNode(volPath);
-
-    pn3->Align(nl3);
-
-//    TGeoHMatrix* ng3 = pn3->GetMatrix(); //"real" global matrix, what survey sees
-//    LOG(debug)<<"*************  The Misaligned Matrix in GRS **************";
-//      ng3->Print();
-
-
+    std::string thisPath(volPath);
+    matrices[thisPath] = ldm;
   }
-  LOG(debug)<<"Align in total "<<fNrOfDetectors<<" detectors.";
 
+  LOG(info) << fNrOfDetectors << " misalignment matrices created!";
+
+  return matrices;
 }
 
-void FairTutorialDet4::ModifyGeometryBySymlink()
+void FairTutorialDet4::RegisterAlignmentMatrices()
 {
-  TString symName;
-  TString detStr   = "Tutorial4/det";
 
-  for (Int_t iDet = 0; iDet < fNrOfDetectors; ++iDet) {
-    LOG(info)<<"Misalign detector nr "<<iDet;
+  if (fModifyGeometry) {
+    TString volPath;
+    TString volStr   = "/cave_1/tutorial4_0/tut4_det_";
 
-    symName  = detStr;
-    symName += Form("%02d",iDet);
+    std::map<std::string, TGeoHMatrix> matrices;
 
-    TGeoPhysicalNode* node = NULL;
-    TGeoPNEntry* entry = gGeoManager->GetAlignableEntry(detStr);
-    if (entry) {
-      node = gGeoManager->MakeAlignablePN(entry);
+    for (Int_t iDet = 0; iDet < fNrOfDetectors; ++iDet) {
+      LOG(debug)<<"Create Matrix for detector nr "<<iDet;
+      volPath  = volStr;
+      volPath += iDet;
+
+      LOG(debug) << "Path: "<< volPath;
+
+      //we have to express the displacements as regards the old local RS (non misaligned BTOF)
+      Double_t dx     = fShiftX[iDet];
+      Double_t dy     = fShiftY[iDet];
+      Double_t dz     = fShiftZ[iDet];
+      Double_t dphi   = fRotX[iDet];
+      Double_t dtheta = fRotY[iDet];
+      Double_t dpsi   = fRotZ[iDet];
+
+      TGeoRotation* rrot = new TGeoRotation("rot",dphi,dtheta,dpsi);
+      TGeoCombiTrans localdelta = *(new TGeoCombiTrans(dx,dy,dz, rrot));
+      TGeoHMatrix ldm = TGeoHMatrix(localdelta);
+
+      std::string thisPath(volPath);
+      matrices[thisPath] = ldm;
     }
- 
-    TGeoMatrix* l3 = NULL;
-    if (node) {
-      l3 = node->GetMatrix();
-    } else {
-      continue;
-    }
 
-    //we have to express the displacements as regards the old local RS (non misaligned BTOF)
-    Double_t dx     = fShiftX[iDet];
-    Double_t dy     = fShiftY[iDet];
-    Double_t dz     = fShiftZ[iDet];
-    Double_t dphi   = fRotX[iDet];
-    Double_t dtheta = fRotY[iDet];
-    Double_t dpsi   = fRotZ[iDet];
-    LOG(info)<<"Psi: "<<dpsi;
+    LOG(info) << fNrOfDetectors << " misalignment matrices created!";
 
-    TGeoRotation* rrot = new TGeoRotation("rot",dphi,dtheta,dpsi);
-    TGeoCombiTrans localdelta = *(new TGeoCombiTrans(dx,dy,dz, rrot));
-    localdelta.Print();
-    TGeoHMatrix nlocal = *l3 * localdelta;
-    TGeoHMatrix* nl3 = new TGeoHMatrix(nlocal); // new matrix, representing real position (from new local mis RS to the global one)
-
-    node->Align(nl3);
-
-    TGeoHMatrix* ng3 = node->GetMatrix(); //"real" global matrix, what survey sees
-    printf("\n\n*************  The Misaligned Matrix in GRS **************\n");
-    ng3->Print();
-
-
+    FairRun* run = FairRun::Instance();
+    run->AddAlignmentMatrices(matrices);
   }
-  //do something
-  LOG(info)<<"Total Nr of detectors: "<<fNrOfDetectors;
-
-
-
-
-
 }
+
 FairTutorialDet4Point* FairTutorialDet4::AddHit(Int_t trackID, Int_t detID,
     TVector3 pos, TVector3 mom,
     Double_t time, Double_t length,
@@ -447,35 +378,6 @@ FairTutorialDet4Point* FairTutorialDet4::AddHit(Int_t trackID, Int_t detID,
 FairModule* FairTutorialDet4::CloneModule() const
 {
   return new FairTutorialDet4(*this);
-}
-
-void FairTutorialDet4::SetSensitiveVolumes()
-{
-  TList* volList = fgGeo->getListOfVolumes();
-
-  // store geo parameter
-  FairRun* fRun = FairRun::Instance();
-  FairRuntimeDb* rtdb= FairRun::Instance()->GetRuntimeDb();
-  FairTutorialDet4GeoPar* par=static_cast<FairTutorialDet4GeoPar*>(rtdb->getContainer("FairTutorialDet4GeoPar"));
-  TObjArray* fSensNodes = par->GetGeoSensitiveNodes();
-  TObjArray* fPassNodes = par->GetGeoPassiveNodes();
-
-  TListIter iter(volList);
-  FairGeoNode* node   = NULL;
-  FairGeoVolume* aVol=NULL;
-
-  while( (node = static_cast<FairGeoNode*>(iter.Next())) ) {
-    aVol = dynamic_cast<FairGeoVolume*> ( node );
-    if ( node->isSensitive()  ) {
-      fSensNodes->AddLast( aVol );
-    } else {
-      fPassNodes->AddLast( aVol );
-    }
-  }
-  par->setChanged();
-  par->setInputVersion(fRun->GetRunId(),1);
-
-  ProcessNodes ( volList );
 }
 
 ClassImp(FairTutorialDet4)

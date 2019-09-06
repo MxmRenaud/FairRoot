@@ -9,6 +9,12 @@
 # the array .
 # The extension is already found.  Any number of sources could be listed here.
 
+add_subdirectory (MCStepLogger)
+
+If(Geant3_FOUND AND yaml-cpp_FOUND)
+  add_subdirectory (MCConfigurator)
+EndIf()
+
 Set(INCLUDE_DIRECTORIES
  ${CMAKE_SOURCE_DIR}/fairtools
  ${FairLogger_INCDIR}

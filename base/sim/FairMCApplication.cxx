@@ -115,6 +115,7 @@ FairMCApplication::FairMCApplication(const char* name, const char* title,
    fMC(NULL),
    fRun(NULL),
    fSaveCurrentEvent(kTRUE),
+   fState(FairMCApplicationState::kUnknownState),
    fRunInfo(),
    fGeometryIsInitialized(kFALSE)
 {
@@ -205,6 +206,7 @@ FairMCApplication::FairMCApplication(const FairMCApplication& rhs)
    fMC(NULL),
    fRun(NULL),
    fSaveCurrentEvent(kTRUE),
+   fState(FairMCApplicationState::kUnknownState),
    fRunInfo(),
    fGeometryIsInitialized(kFALSE)
 {
@@ -297,6 +299,7 @@ FairMCApplication::FairMCApplication()
    fMC(NULL),
    fRun(NULL),
    fSaveCurrentEvent(kTRUE),
+   fState(FairMCApplicationState::kUnknownState),
    fRunInfo(),
    fGeometryIsInitialized(kFALSE)
 {
@@ -400,6 +403,8 @@ FairMCApplication& FairMCApplication::operator=(const FairMCApplication& rhs)
     //gROOT->GetListOfBrowsables()->Add(fFairTaskList);
     
     fDetMap=new TRefArray(1000);
+
+    fState = rhs.fState;
   }
   
   return *this;
@@ -470,11 +475,9 @@ void FairMCApplication::FinishRun()
 
   LOG(debug) << "FairMCMCApplication::FinishRun() start";
 
-  for( std::list<FairDetector *>::iterator  listIter = listActiveDetectors.begin();
-        listIter != listActiveDetectors.end();
-        listIter++)
+  for (auto detectorPtr : listActiveDetectors)
   {
-    (*listIter)->FinishRun();
+    detectorPtr->FinishRun();
   }
 
 
@@ -545,12 +548,10 @@ void FairMCApplication::BeginEvent()
 {
 // User actions at beginning of event
 // ---
-    
-    for( std::list<FairDetector *>::iterator  listIter = listActiveDetectors.begin();
-                                              listIter != listActiveDetectors.end();
-                                              listIter++)
+
+    for (auto detectorPtr : listActiveDetectors)
     {
-      (*listIter)->BeginEvent();
+      detectorPtr->BeginEvent();
     }
 }
 
@@ -559,31 +560,24 @@ void FairMCApplication::BeginPrimary()
 {
 // User actions at beginning of a primary track
 // ---
-    for( std::list<FairDetector *>::iterator  listIter = listActiveDetectors.begin();
-        listIter != listActiveDetectors.end();
-        listIter++)
+    for (auto detectorPtr : listActiveDetectors)
     {
-      (*listIter)->BeginPrimary();
+      detectorPtr->BeginPrimary();
     }
-
 }
 
 //_____________________________________________________________________________
 void FairMCApplication::PreTrack()
 {
-
 // User actions at beginning of each track
 // ---
 
-  
- for( std::list<FairDetector *>::iterator  listIter = listActiveDetectors.begin();
-                                           listIter != listActiveDetectors.end();
-                                           listIter++)
- {
-    (*listIter)->PreTrack();
- }
-    
-    
+  for (auto detectorPtr : listActiveDetectors)
+  {
+    detectorPtr->PreTrack();
+  }
+
+
   fTrajAccepted=kFALSE;
   if(NULL != fTrajFilter) {
     // Get the pointer to current track
@@ -774,12 +768,9 @@ void FairMCApplication::PostTrack()
 {
 // User actions after finishing of each track
 // ---
-    
-  for( std::list<FairDetector *>::iterator  listIter = listActiveDetectors.begin();
-       listIter != listActiveDetectors.end();
-       listIter++)
+  for (auto detectorPtr : listActiveDetectors)
   {
-    (*listIter)->PostTrack();
+    detectorPtr->PostTrack();
   }
 
 }
@@ -789,11 +780,9 @@ void FairMCApplication::FinishPrimary()
 {
 // User actions after finishing of a primary track
 // ---
-  for( std::list<FairDetector *>::iterator  listIter = listActiveDetectors.begin();
-       listIter != listActiveDetectors.end();
-       listIter++)
+  for (auto detectorPtr : listActiveDetectors)
   {
-    (*listIter)->FinishPrimary();
+    detectorPtr->FinishPrimary();
   }
 
   fStack->FinishPrimary();
@@ -838,11 +827,9 @@ void FairMCApplication::FinishEvent()
     fFairTaskList->FinishEvent();
   }
 
-  for( std::list<FairDetector *>::iterator  listIter = listActiveDetectors.begin();
-       listIter != listActiveDetectors.end();
-       listIter++)
+  for (auto detectorPtr : listActiveDetectors)
   {
-    (*listIter)->FinishEvent();
+    detectorPtr->FinishEvent();
   }
 
   if (fRootManager && fSaveCurrentEvent) {
@@ -851,11 +838,9 @@ void FairMCApplication::FinishEvent()
     fSaveCurrentEvent = kTRUE;
   }
 
-  for( std::list<FairDetector *>::iterator  listIter = listActiveDetectors.begin();
-       listIter != listActiveDetectors.end();
-       listIter++)
+  for (auto detectorPtr : listActiveDetectors)
   {
-    (*listIter)->EndOfEvent();
+    detectorPtr->EndOfEvent();
   }
     
   fStack->Reset();
@@ -949,6 +934,8 @@ void FairMCApplication::ConstructGeometry()
     LOG(fatal) << "gGeoManager not initialized at FairMCApplication::ConstructGeometry\n";
   }
 
+  fState = FairMCApplicationState::kConstructGeometry;
+
   fModIter->Reset();
   FairModule* Mod=NULL;
   Int_t NoOfVolumes=0;
@@ -1008,15 +995,30 @@ void FairMCApplication::ConstructGeometry()
   }
   fModIter->Reset();
   while((Mod = dynamic_cast<FairModule*>(fModIter->Next()))) {
-    Mod->ModifyGeometry();
+    Mod->RegisterAlignmentMatrices();
   }
 
+  // dont use this here anymore, use FairMCApplication::MisalignGeometry
+  // fRun->AlignGeometry()
+
   gGeoManager->RefreshPhysicalNodes(kFALSE);
+
+  fState = FairMCApplicationState::kUnknownState;
+}
+
+// ____________________________________________________________________________
+Bool_t FairMCApplication::MisalignGeometry()
+{
+  // call this only here
+  fRun->AlignGeometry();
+  return true;
 }
 
 //_____________________________________________________________________________
 void FairMCApplication::InitGeometry()
 {
+  fState = FairMCApplicationState::kInitGeometry;
+
   LOG(info) << "FairMCApplication::InitGeometry: "
     << fRootManager->GetInstanceId();
   
@@ -1155,6 +1157,7 @@ void FairMCApplication::InitGeometry()
 
   fGeometryIsInitialized=kTRUE;
 
+  fState = FairMCApplicationState::kUnknownState;
 }
 
 //_____________________________________________________________________________
@@ -1218,31 +1221,30 @@ void  FairMCApplication::AddIons()
 //_____________________________________________________________________________
 void  FairMCApplication::AddParticles()
 {
-
-  TObjArray* NewIons=fRun->GetUserDefIons();
-  TIterator* Iter=NewIons->MakeIterator();
-  Iter->Reset();
-  TObject* obj=0;
-  TObjArray* NewPart=fRun->GetUserDefParticles();
-  TIterator* parIter=NewPart->MakeIterator();
+  TObjArray* NewPart = fRun->GetUserDefParticles();
+  TIterator* parIter = NewPart->MakeIterator();
   parIter->Reset();
-  obj=0;
+
+  // check MC engine is not null (fMC is 0x00 at this line in case of Geant4)
+  TVirtualMC* curMC = TVirtualMC::GetMC();
+  if (!curMC) LOG(fatal)<<"No MC engine was defined before AddParticles()";
+
+  TObject* obj=0;
   FairParticle* particle=0;
-  while((obj=parIter->Next())) {
-    particle=dynamic_cast <FairParticle*> (obj);
-    if(particle) {                // (Int_t pdg, const char* name, TMCParticleType type,
-      //Double_t mass, Double_t charge, Double_t lifetime);
+  while ((obj = parIter->Next())) {
+    particle = dynamic_cast <FairParticle*> (obj);
+    if (particle) {  // (Int_t pdg, const char* name, TMCParticleType type, Double_t mass, Double_t charge, Double_t lifetime);
       LOG(info) << "Add Particle: " << particle->GetName()  << " with PDG " <<   particle->GetPDG() << "\n"<<
-           particle->GetName() << "            // const TString& name \n" <<
-           particle->GetMCType()<<"             // TMCParticleType mcType \n" <<
+           particle->GetName() << "           // const TString& name \n" <<
+           particle->GetMCType()<<"           // TMCParticleType mcType \n" <<
            particle->GetMass()<<"             // Double_t mass   \n" <<
            particle->GetCharge()<<"           // Double_t charge \n" <<
            particle->GetDecayTime()<<"        // Double_t lifetime  \n" <<
-           particle->GetPType()<<  "           // const TString& pType, \n" <<
+           particle->GetPType()<<  "          // const TString& pType, \n" <<
            particle->GetWidth()<<   "         // Double_t width   \n" <<
            particle->GetSpin()<<    "         // Int_t iSpin  \n" <<
            particle->GetiParity()<< "         // Int_t iParity \n" <<
-           particle->GetConjugation()<<"       // Int_t iConjugation  \n" <<
+           particle->GetConjugation()<<"      // Int_t iConjugation  \n" <<
            particle->GetIsospin()<<   "       // Int_t iIsospin   \n" <<
            particle->GetIsospinZ()<<  "       // Int_t iIsospinZ    \n" <<
            particle->GetgParity()<<   "       // Int_t gParity    \n" <<
@@ -1250,33 +1252,33 @@ void  FairMCApplication::AddParticles()
            particle->GetBaryon()<<  "         // Int_t baryon   \n" <<
            particle->IsStable() <<  "         // Bool_t stable   \n";
 
-      fMC->DefineParticle(particle->GetPDG(),              // Int_t pdg
-                          particle->GetName(),             // const TString& name
-                          particle->GetMCType(),             // TMCParticleType mcType
-                          particle->GetMass(),             // Double_t mass
-                          particle->GetCharge(),           // Double_t charge
-                          particle->GetDecayTime(),        // Double_t lifetime
-                          particle->GetPType(),             // const TString& pType,
-                          particle->GetWidth(),            // Double_t width
-                          particle->GetSpin(),             // Int_t iSpin
-                          particle->GetiParity(),          // Int_t iParity
-                          particle->GetConjugation(),       // Int_t iConjugation
-                          particle->GetIsospin(),          // Int_t iIsospin
-                          particle->GetIsospinZ(),         // Int_t iIsospinZ
-                          particle->GetgParity(),          // Int_t gParity
-                          particle->GetLepton(),           // Int_t lepton
-                          particle->GetBaryon(),           // Int_t baryon
-                          particle->IsStable()             // Bool_t stable
-                         );
-      //Add Ion to gGeoManager visualization
-      if(gGeoManager) {
-        gGeoManager->SetPdgName(particle->GetPDG(),particle->GetName() );
-      }
+      curMC->DefineParticle(particle->GetPDG(),              // Int_t pdg
+                            particle->GetName(),             // const TString& name
+                            particle->GetMCType(),           // TMCParticleType mcType
+                            particle->GetMass(),             // Double_t mass
+                            particle->GetCharge(),           // Double_t charge
+                            particle->GetDecayTime(),        // Double_t lifetime
+                            particle->GetPType(),            // const TString& pType,
+                            particle->GetWidth(),            // Double_t width
+                            particle->GetSpin(),             // Int_t iSpin
+                            particle->GetiParity(),          // Int_t iParity
+                            particle->GetConjugation(),      // Int_t iConjugation
+                            particle->GetIsospin(),          // Int_t iIsospin
+                            particle->GetIsospinZ(),         // Int_t iIsospinZ
+                            particle->GetgParity(),          // Int_t gParity
+                            particle->GetLepton(),           // Int_t lepton
+                            particle->GetBaryon(),           // Int_t baryon
+                            particle->IsStable()             // Bool_t stable
+                         );   
+
+      //Add Particle to gGeoManager visualization
+      if(gGeoManager)
+        gGeoManager->SetPdgName(particle->GetPDG(), particle->GetName());
     }
   }
-  delete   parIter;
+
+  delete parIter;
   AddDecayModes();
-  delete Iter;
 }
 
 //_____________________________________________________________________________

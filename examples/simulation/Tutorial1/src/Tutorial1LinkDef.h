@@ -16,5 +16,8 @@
 #pragma link C++ class FairTutorialDet1GeoPar;
 #pragma link C++ class FairTutorialDet1+;
 #pragma link C++ class FairTutorialDet1Point+;
+#pragma link C++ class FairSimConfig+;
+#pragma link C++ class FairFastSimExample+;
+#pragma link C++ class FairFastSimExample2+;
 
 #endif

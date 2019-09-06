@@ -6,9 +6,13 @@
  #              GNU Lesser General Public Licence (LGPL) version 3,             #
  #                  copied verbatim in the file "LICENSE"                       #
  ################################################################################
-If(GEANT3_FOUND)
+If(Geant3_FOUND)
   add_subdirectory(common/passive)
   add_subdirectory(common/mcstack)
+  FIND_PATH(YAML_CPP_FOUND NAMES yaml.h PATHS ${SIMPATH}/include/yaml-cpp/)
+  If(YAML_CPP_FOUND)
+    add_subdirectory(common/gconfig)
+  EndIf(YAML_CPP_FOUND)
 
   add_subdirectory(simulation/Tutorial1)
   add_subdirectory(simulation/Tutorial2)
@@ -26,6 +30,7 @@ EndIf()
 
 If(FairMQ_FOUND)
   add_subdirectory(MQ/Lmd)
+  add_subdirectory(MQ/histogramServer)
 EndIf()
 
 If(Go_FOUND AND ZeroMQ_FOUND)

@@ -33,6 +33,7 @@ class FairMonitor : public TNamed
   static FairMonitor* GetMonitor();
 
   void EnableMonitor(Bool_t tempBool = kTRUE, TString fileName = "") { fRunMonitor = tempBool; fOutputFileName = fileName; }
+  void EnableDrawing(Bool_t tempBool = kTRUE) { fDrawCanvas = tempBool; }
   Bool_t IsRunning() { return fRunMonitor; }
 
   void StartMonitoring(const TTask* tTask, const char* identStr) {
@@ -66,7 +67,7 @@ class FairMonitor : public TNamed
 
   TList* GetHistList() { return fHistList; }
 
-  void StoreHistograms();
+  void StoreHistograms(TFile* sinkFile);
 
   private:
     static FairMonitor* instance;
@@ -76,6 +77,7 @@ class FairMonitor : public TNamed
     FairMonitor& operator=(const FairMonitor&);
 
     Bool_t fRunMonitor;
+    Bool_t fDrawCanvas;
 
     Double_t fRunTime; 
     Double_t fRunMem;

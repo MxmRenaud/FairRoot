@@ -45,6 +45,7 @@ FairMonitor* FairMonitor::instance = NULL;
 FairMonitor::FairMonitor()
   : TNamed("FairMonitor","Monitor for FairRoot")
   , fRunMonitor(kFALSE)
+  , fDrawCanvas(kFALSE)
   , fRunTime(0.)
   , fRunMem(0.)
   , fTimerMap()
@@ -618,36 +619,36 @@ void FairMonitor::DrawHist(TString specString) {
 //_____________________________________________________________________________
 
 //_____________________________________________________________________________
-void FairMonitor::StoreHistograms()
+void FairMonitor::StoreHistograms(TFile* sinkFile)
 {
   if ( !fRunMonitor ) {
     return;
   }
+  Bool_t wasBatch = gROOT->IsBatch();
+  if ( !fDrawCanvas && !wasBatch ) // default: switching to batch mode if draw canvas disabled
+    gROOT->SetBatch(kTRUE);
   this->Draw();
+  if ( !fDrawCanvas && !wasBatch ) // default: switching to batch mode if draw canvas disabled
+    gROOT->SetBatch(kFALSE);
 
-  TFile* prevFile = gFile;
-
-  TFile* outFile = NULL;
-  if ( fOutputFileName.Length() > 1 && fOutputFileName != gFile->GetName() ) {
-    outFile = TFile::Open(fOutputFileName,"recreate");
+  TFile* histoFile = sinkFile;
+  if ( fOutputFileName.Length() > 1 && fOutputFileName != sinkFile->GetName() ) {
+      histoFile = TFile::Open(fOutputFileName,"recreate");
   }
 
-  gFile->mkdir("MonitorResults");
-  gFile->cd("MonitorResults");
+  histoFile->mkdir("MonitorResults");
+  histoFile->cd("MonitorResults");
   TIter next(fHistList);
   while ( TH1* thist = (static_cast<TH1*>(next())) ) {
     thist->SetBins(thist->GetEntries(),0,thist->GetEntries());
     thist->Write();
   }
   fCanvas->Write();
-  fCanvas->Close();
 
-  if ( outFile ) {
-    outFile->Close();
-    delete outFile;
+  if ( histoFile != sinkFile ) {
+    histoFile->Close();
+    delete histoFile;
   }
-
-  gDirectory = prevFile;
 }
 //_____________________________________________________________________________
 

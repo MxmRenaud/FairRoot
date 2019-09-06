@@ -114,7 +114,9 @@ Macro(ROOT_GENERATE_DICTIONARY_NEW)
     Configure_File(${FAIRROOTPATH}/share/fairbase/cmake/scripts/generate_dictionary_root.sh.in
                    ${CMAKE_CURRENT_BINARY_DIR}/generate_dictionary_${script_name}.sh
                   )
-    EXEC_PROGRAM(/bin/chmod ARGS "u+x ${CMAKE_CURRENT_BINARY_DIR}/generate_dictionary_${script_name}.sh")
+    #EXEC_PROGRAM(/bin/chmod ARGS "u+x ${CMAKE_CURRENT_BINARY_DIR}/generate_dictionary_${script_name}.sh")
+    execute_process(COMMAND /bin/chmod u+x ${CMAKE_CURRENT_BINARY_DIR}/generate_dictionary_${script_name}.sh OUTPUT_QUIET)
+
   ELSE(FAIRROOTPATH)
     Configure_File(${PROJECT_SOURCE_DIR}/cmake/scripts/generate_dictionary_root.sh.in
                    ${CMAKE_CURRENT_BINARY_DIR}/generate_dictionary_${script_name}.sh
@@ -200,6 +202,7 @@ MACRO (GENERATE_ROOT_TEST_SCRIPT SCRIPT_FULL_NAME)
 
   set(my_script_name ${SCRIPT_FULL_NAME})
 
+  Write_Geant4Data_Variables_sh()
   IF(FAIRROOTPATH)
     configure_file(${FAIRROOTPATH}/share/fairbase/cmake/scripts/root_macro.sh.in
                    ${new_path}/${shell_script_name}
@@ -209,8 +212,7 @@ MACRO (GENERATE_ROOT_TEST_SCRIPT SCRIPT_FULL_NAME)
                    ${new_path}/${shell_script_name}
                   )
   ENDIF(FAIRROOTPATH)
-
-  EXEC_PROGRAM(/bin/chmod ARGS "u+x  ${new_path}/${shell_script_name}")
+  execute_process(COMMAND /bin/chmod u+x ${new_path}/${shell_script_name} OUTPUT_QUIET)
 
 ENDMACRO (GENERATE_ROOT_TEST_SCRIPT)
 
@@ -311,13 +313,13 @@ Macro(GENERATE_LIBRARY)
     get_filename_component(_ext ${d} EXT)
     If(NOT _ext MATCHES a$)
       set(Int_DEPENDENCIES ${Int_DEPENDENCIES} ${d})
-    Else()      
+    Else()
       Message("Found Static library with extension ${_ext}")
       get_filename_component(_lib ${d} NAME_WE)
       set(Int_DEPENDENCIES ${Int_DEPENDENCIES} ${_lib})
     EndIf()
   endforeach()
- 
+
   ############### build the library #####################
   If(${CMAKE_GENERATOR} MATCHES Xcode)
     Add_Library(${Int_LIB} SHARED ${Int_SRCS} ${NO_DICT_SRCS} ${HDRS} ${LINKDEF})
@@ -364,4 +366,3 @@ Macro(GENERATE_EXECUTABLE)
   Set(DEPENDENCIES)
 
 EndMacro(GENERATE_EXECUTABLE)
-

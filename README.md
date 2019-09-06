@@ -1,3 +1,5 @@
+# FairRoot [![license](https://alfa-ci.gsi.de/shields/badge/license-LGPL--3.0-orange.svg)](COPYRIGHT) [![Codacy Badge](https://api.codacy.com/project/badge/Grade/639125056b554837b9fd996fb197f833)](https://www.codacy.com/app/FairRootGroup/FairRoot?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=FairRootGroup/FairRoot&amp;utm_campaign=Badge_Grade)
+
 ## The FairRoot framework
 A simulation, reconstruction and analysis framework that is based on the ROOT system.
 The user can create simulated data and/or perform analysis with the same framework.  Geant3 and Geant4 transport engines are supported, however the user code that creates simulated data do not depend on a particular monte carlo engine. The framework delivers base classes which enable the users to  construct their detectors and /or analysis tasks in a simple way, it also delivers some general functionality like track visualization. Moreover an interface for reading magnetic field maps is also implemented.
@@ -8,7 +10,7 @@ FairRoot  is distributed under the terms of the GNU Lesser General Public Licenc
 ## Release information
 Please see : https://github.com/FairRootGroup/FairRoot/releases
 
-##Getting started
+## Getting started
 Please see : http://fairroot.gsi.de/getting_started  for  details.
 
 
@@ -83,7 +85,7 @@ echo 'treename=name_you_chose' > config/rootmanager.dat
 
 3. Install the template:
 
-   you need to copy the  [project template] (https://github.com/FairRootGroup/FairRoot/tree/dev/templates/project_template) to you own directory  
+   you need to copy the  [project template](https://github.com/FairRootGroup/FairRoot/tree/dev/templates/project_template) to you own directory  
 
     ```bash
     # Set the shell variable FAIRROOTPATH to the FairRoot installation directory
@@ -124,21 +126,6 @@ echo 'treename=name_you_chose' > config/rootmanager.dat
     root [1] .q
     ```
 
-## Build with data base module (-DWITH_DBASE)
-
-The data base interface is now in a separate repository, to use it you have to download it first:
-
-```bash
- cd FairRoot
- mkdir dbase
- cd dbase
- git clone https://github.com/denisbertini/dbase .
-
-```
-
-The interface to data bases can be switched on by setting the the cmake flage -DWITH_DBASE=ON
-
-__Warning__: This option will change the inheritance tree of the parameter objects.
 
 
 ## Modular (custom) installation of FairRoot:
@@ -164,7 +151,7 @@ also in AlFa_DIR
 - requires new versions of VMC packages built with CMake
 and installed either in AlFa_DIR or available on path
 
- ```bash
+```bash
   cmake \
   -DCMAKE_INSTALL_PREFIX="Installation_directory_for_fairroot" \
   -DFAIRROOT_MODULAR_BUILD=ON \
